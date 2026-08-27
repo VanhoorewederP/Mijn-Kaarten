@@ -126,10 +126,10 @@
     }
   </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white" oncontextmenu="return false;">
+<body class="text-slate-800 font-sans antialiased flex flex-col h-full bg-white select-none" oncontextmenu="return false;">
 
   <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Gradient -->
-  <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-indigo-300/30">
+  <header class=<header class="flex-shrink-0 navy-mesh-gradient text-white shadow-lg z-20 px-4 pb-4 header-box border-b border-indigo-300/30">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
         <span>💳</span> Mijn Kaarten
@@ -152,7 +152,7 @@
   </header>
 
   <!-- MIDDEN: Wit Kaartenoverzicht -->
-  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white pb-32">
+  <main class="card-scroll-area flex-1 p-4 max-w-lg w-full mx-auto bg-white pb-32">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
