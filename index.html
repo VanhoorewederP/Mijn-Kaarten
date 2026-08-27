@@ -6,7 +6,7 @@
   <title>Mijn Kaarten</title>
   
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#122b68">
+  <meta name="theme-color" content="#0e2254">
   <meta name="mobile-web-app-capable" content="yes">
   
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,6 +14,7 @@
   <meta name="apple-mobile-web-app-title" content="Kaarten">
   <link rel="apple-touch-icon" href="icon-1024.png">
 
+  <!-- Externe Bibliotheken -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -46,7 +47,7 @@
       background-color: #ffffff;
     }
 
-    /* Lichtere, levendigere Navy & Indigo Mesh Gradient */
+    /* Levendige Navy & Indigo Gradient */
     .navy-mesh-gradient {
       background: linear-gradient(135deg, #0e2254 0%, #1d4ed8 45%, #4338ca 80%, #6366f1 100%);
     }
@@ -81,7 +82,7 @@
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white" oncontextmenu="return false;">
 
-  <!-- BOVENSTE VAK: Strakke volle rechthoekige kader met lichtere Navy Gradient -->
+  <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Gradient -->
   <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-indigo-300/30">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
@@ -104,21 +105,20 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht -->
+  <!-- MIDDEN: Wit Kaartenoverzicht -->
   <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white pb-32">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
-  <!-- ONDERSTE VAK: Organische Dock met lichtere Navy Gradient -->
+  <!-- ONDERSTE VAK: Vloeiende Dock met afgeronde top -->
   <nav class="fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-indigo-300/30 z-30 px-6 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(29,78,216,0.25)]">
-    
     <!-- Links: Alle Kaarten -->
     <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">🗂️</span>
       <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
 
-    <!-- Midden: Vaakst Gebruikt -->
+    <!-- Midden: Vaakst Gebruikt (Standaard Actief) -->
     <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]">
       <span class="text-xl leading-none">⭐</span>
       <span class="text-[11px] font-extrabold tracking-tight">Vaakst Gebruikt</span>
@@ -131,7 +131,7 @@
     </button>
   </nav>
 
-  <!-- Modal: Beheer (Lichtere Gradient Knoppen) -->
+  <!-- Modal: Beheer -->
   <div id="manageModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50" onclick="closeModalOnBgClick(event)">
     <div class="bg-white border border-slate-200 w-full max-w-xs rounded-3xl p-6 flex flex-col gap-4 text-slate-900 shadow-2xl my-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -159,7 +159,7 @@
     </div>
   </div>
 
-  <!-- Modal: Toon Code (Groot formaat & WakeLock) -->
+  <!-- Modal: Toon Code (Groot formaat & Helderheid) -->
   <div id="viewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
     <div id="viewModalContent" class="bg-white text-slate-900 w-full max-w-md rounded-[2.5rem] p-6 sm:p-8 flex flex-col items-center gap-4 text-center shadow-2xl my-auto border border-slate-100">
       
@@ -244,7 +244,6 @@
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Formaat</label>
             <div class="grid grid-cols-2 gap-2 mt-1">
-              <!-- Actieve knop in Gradient Stijl -->
               <button type="button" id="typeBarcodeBtn" onclick="setType('BARCODE')" class="py-2.5 rounded-xl text-xs font-extrabold navy-mesh-gradient text-white border border-indigo-300/30 transition shadow-sm">Streepjescode</button>
               <button type="button" id="typeQrBtn" onclick="setType('QR_CODE')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-100 text-slate-600 transition">QR-Code</button>
             </div>
@@ -330,9 +329,10 @@
   </div>
 
   <script>
+    // 1. Service Worker registratie met expliciete bypass van de HTTP-cache
     let swRegistration = null;
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').then((reg) => {
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
         swRegistration = reg;
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
@@ -348,6 +348,7 @@
       });
     }
 
+    // 2. Globale variabelen
     let cards = JSON.parse(localStorage.getItem('cards') || '[]');
     let html5QrCode = null;
     let currentSelectedType = 'BARCODE';
@@ -368,7 +369,7 @@
       iconData: '#1d4ed8'
     };
 
-    // --- Screen Wake Lock ---
+    // 3. Screen Wake Lock
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -384,7 +385,7 @@
       }
     }
 
-    // --- Custom Dialogs ---
+    // 4. Universele Custom Popups
     function showAppDialog({ title = 'Melding', message = '', icon = 'ℹ️', confirmText = 'Begrepen', confirmColor = 'navy-mesh-gradient', showCancel = false, cancelText = 'Annuleren' }) {
       return new Promise((resolve) => {
         const modal = document.getElementById('dialogModal');
@@ -421,7 +422,7 @@
 
     window.alert = function(msg) { showAppAlert(msg); };
 
-    // --- Tab Management ---
+    // 5. Tabblad Management
     function switchTab(tab) {
       currentTab = tab;
       const allBtn = document.getElementById('tabAllBtn');
@@ -458,7 +459,7 @@
       return name.slice(0, 2).toUpperCase();
     }
 
-    // --- Render Kaarten ---
+    // 6. Render Kaarten
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -510,7 +511,7 @@
       });
     }
 
-    // --- Show Card ---
+    // 7. Kaart Weergeven
     function showCard(index) {
       activeViewingIndex = index;
       const card = cards[index];
@@ -624,7 +625,7 @@
       document.getElementById('addModal').classList.remove('hidden');
     }
 
-    // --- Wizard Flow ---
+    // 8. Wizard Stappen
     function openAddModal() {
       editingIndex = null;
       document.getElementById('cardName').value = '';
@@ -793,7 +794,7 @@
       closeModal('addModal');
     }
 
-    // --- Backup & Restore ---
+    // 9. Backup & Restore
     async function exportBackup() {
       if (cards.length === 0) {
         showAppAlert("Er zijn nog geen kaarten om een backup van te maken.", "Geen Kaarten", "ℹ️");
@@ -867,33 +868,33 @@
       reader.readAsText(file);
     }
 
+    // 10. Forceren van Update
     async function checkForAppUpdate() {
       const icon = document.getElementById('updateIcon');
       icon.classList.add('animate-spin');
 
-      if (!swRegistration) {
-        setTimeout(() => {
-          icon.classList.remove('animate-spin');
-          window.location.reload();
-        }, 600);
-        return;
-      }
-
       try {
-        await swRegistration.update();
+        await fetch(`./sw.js?t=${Date.now()}`, { cache: 'no-store' });
+
+        if (swRegistration) {
+          await swRegistration.update();
+        }
+
         setTimeout(() => {
           icon.classList.remove('animate-spin');
-          if (!swRegistration.waiting && !swRegistration.installing) {
+          if (swRegistration && (swRegistration.waiting || swRegistration.installing)) {
+            showAppAlert("Nieuwe versie gevonden! De app herstart nu...", "Bezig met updaten", "🚀");
+          } else {
             showAppAlert("Je hebt al de meest recente versie van de app!", "Alles Up-to-Date", "✨");
           }
-        }, 800);
+        }, 1000);
       } catch (err) {
         icon.classList.remove('animate-spin');
         window.location.reload();
       }
     }
 
-    // --- Helper Functions ---
+    // 11. Helper Functies
     function setType(type) {
       currentSelectedType = type;
       const bBtn = document.getElementById('typeBarcodeBtn');
@@ -919,7 +920,7 @@
       return 'BARCODE';
     }
 
-    // --- Scanner Logic ---
+    // 12. Scanner Logica
     async function toggleScanner() {
       if (isCameraBusy) return;
       const container = document.getElementById('scanner-container');
@@ -1023,6 +1024,7 @@
       if (e.target === e.currentTarget) closeModal(e.currentTarget.id);
     }
 
+    // Start direct
     renderCards();
   </script>
 </body>
