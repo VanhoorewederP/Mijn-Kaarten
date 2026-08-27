@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl" class="h-full bg-[#0e2254]">
+<html lang="nl" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -28,14 +28,13 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
-    *, *::before, *::after {
-      -webkit-touch-callout: none !important;
-      -webkit-user-select: none !important;
-      user-select: none !important;
-    }
-
-    img {
-      pointer-events: none;
+    body {
+      padding-top: var(--sat);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+      margin: 0;
+      background-color: #ffffff;
+      -webkit-overflow-scrolling: touch;
     }
 
     .navy-mesh-gradient {
@@ -43,23 +42,15 @@
     }
 
     .header-box {
-      padding-top: max(0.9rem, var(--sat));
-      padding-left: max(1rem, var(--sal));
-      padding-right: max(1rem, var(--sar));
+      padding-top: max(0.5rem, var(--sat));
     }
 
     .nav-box {
       padding-bottom: max(0.6rem, var(--sab));
-      padding-left: max(1rem, var(--sal));
-      padding-right: max(1rem, var(--sar));
     }
 
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
-    input[type="text"] { 
-      font-size: 16px; 
-      -webkit-user-select: auto !important; 
-      user-select: auto !important; 
-    }
+    input[type="text"] { font-size: 16px; }
 
     #barcodeCanvas {
       width: 100% !important;
@@ -74,10 +65,10 @@
     }
   </style>
 </head>
-<body class="bg-[#0e2254] text-slate-800 font-sans antialiased h-[100dvh] flex flex-col overflow-hidden select-none m-0 p-0" oncontextmenu="return false;">
+<body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased pb-28">
 
-  <!-- BOVENSTE VAK: Vaste Header -->
-  <header class="flex-none navy-mesh-gradient text-white shadow-lg z-20 pb-4 header-box border-b border-indigo-300/30">
+  <!-- BOVENSTE VAK: Vaste Sticky Header -->
+  <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-indigo-300/30">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
         <span>💳</span> Mijn Kaarten
@@ -99,22 +90,20 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Volledig Scrollbare Kaarten Container -->
-  <main class="flex-1 overflow-y-auto bg-white" style="-webkit-overflow-scrolling: touch;">
-    <div class="p-4 max-w-lg mx-auto pb-10">
-      <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
-    </div>
+  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (Scrollt natuurlijk mee) -->
+  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
+    <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
-  <!-- ONDERSTE VAK: Dock Navigatie (Geen witruimte eronder) -->
-  <nav class="flex-none navy-mesh-gradient border-t border-indigo-300/30 z-20 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(29,78,216,0.25)]">
+  <!-- ONDERSTE VAK: Vaste Dock Navigatie -->
+  <nav class="fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-indigo-300/30 z-30 px-6 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(29,78,216,0.25)]">
     <!-- Links: Alle Kaarten -->
     <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">🗂️</span>
       <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
 
-    <!-- Midden: Vaakst Gebruikt (Standaard Actief) -->
+    <!-- Midden: Vaakst Gebruikt -->
     <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]">
       <span class="text-xl leading-none">⭐</span>
       <span class="text-[11px] font-extrabold tracking-tight">Vaakst Gebruikt</span>
