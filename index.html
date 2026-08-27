@@ -28,7 +28,7 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
-    /* Rijke, iets donkerdere Marine / Navy Blue Mesh Gradient */
+    /* Rijke Marine / Navy Blue Mesh Gradient */
     .navy-mesh-gradient {
       background: linear-gradient(135deg, #08142c 0%, #0e2a66 45%, #1d4ed8 80%, #1e40af 100%);
     }
@@ -65,11 +65,20 @@
       width: 240px !important;
       height: 240px !important;
     }
+
+    /* Vaste scrollbalk verbergen voor strakke app-look */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white pb-32">
 
-  <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Blue Gradient (vult de statusbalk perfect op) -->
+  <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Blue Gradient -->
   <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-blue-400/20">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
@@ -92,7 +101,7 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (Scrollt natuurlijk en vloeiend mee) -->
+  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (1:1 Vaste Vierkanten) -->
   <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
@@ -243,40 +252,64 @@
         </div>
       </div>
 
-      <!-- STAP 2 -->
+      <!-- STAP 2: 4 UITGEBREIDE ICOON METHODES -->
       <div id="wizardStep2" class="hidden flex flex-col gap-4">
-        <div class="flex flex-col items-center justify-center p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-          <span class="text-[11px] font-bold text-slate-400 uppercase mb-2">Voorbeeld Tegel</span>
-          <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-sm bg-blue-800 text-white overflow-hidden p-1">
+        
+        <!-- Live Preview Tegel -->
+        <div class="flex flex-col items-center justify-center p-3.5 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner">
+          <span class="text-[11px] font-bold text-slate-400 uppercase mb-2">Live Voorbeeld</span>
+          <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-md bg-blue-900 text-white overflow-hidden p-0 border border-slate-200/80">
             <span id="previewInitials">CO</span>
           </div>
-          <span id="previewName" class="text-sm font-bold text-slate-900 mt-2 truncate max-w-[150px]">Colruyt</span>
+          <span id="previewName" class="text-sm font-extrabold text-slate-900 mt-2 truncate max-w-[150px]">Colruyt</span>
         </div>
 
+        <!-- 1. Online HD Zoekmachine (Google Images + HD resolvers) -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Online Logo Zoeken</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Zoek HD Logo (Alles online)</label>
           <div class="flex gap-2">
-            <input id="logoSearchQuery" type="text" placeholder="bv. Colruyt logo" class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
-            <button onclick="searchWebLogos()" type="button" class="bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3.5 py-2 rounded-2xl text-xs font-bold text-slate-800">Zoek</button>
+            <input id="logoSearchQuery" type="text" placeholder="Winkel of merk..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
+            <button onclick="searchWebLogos()" type="button" class="navy-mesh-gradient text-white px-4 py-2 rounded-2xl text-xs font-bold shadow-sm">Zoek</button>
           </div>
-          <div id="onlineLogoResults" class="flex gap-2 overflow-x-auto py-1 min-h-[50px] items-center">
-            <span class="text-xs text-slate-400">Klik op 'Zoek' voor suggesties</span>
+          <div id="onlineLogoResults" class="flex gap-2 overflow-x-auto py-1.5 min-h-[60px] items-center no-scrollbar">
+            <span class="text-xs text-slate-400">Klik op 'Zoek' voor suggesties...</span>
           </div>
         </div>
 
+        <!-- 2. Foto met automatische 1:1 Center-Square Crop -->
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart (Vierkant)</label>
           <button onclick="document.getElementById('cardPhotoInput').click()" type="button" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 py-2.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 text-slate-800 shadow-sm">
             📸 Neem Foto van Kaart
           </button>
           <input type="file" id="cardPhotoInput" accept="image/*" capture="environment" class="hidden" onchange="handleCardPhotoUpload(this)">
         </div>
 
+        <!-- 3. Categorie Pictogrammen met Eigen Achtergrondkleur -->
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">3. Of kies Kleur & Initialen</label>
-          <div id="colorSwatches" class="flex gap-2 overflow-x-auto py-1.5 px-0.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">3. Categorie Pictogram (Bib, Apotheek...)</label>
+          <div class="flex gap-2 overflow-x-auto py-1 no-scrollbar text-lg">
+            <button type="button" onclick="selectCategoryIcon('💊')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">💊</button>
+            <button type="button" onclick="selectCategoryIcon('📚')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">📚</button>
+            <button type="button" onclick="selectCategoryIcon('🥐')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🥐</button>
+            <button type="button" onclick="selectCategoryIcon('🥩')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🥩</button>
+            <button type="button" onclick="selectCategoryIcon('☕')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">☕</button>
+            <button type="button" onclick="selectCategoryIcon('⛽')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">⛽</button>
+            <button type="button" onclick="selectCategoryIcon('🛒')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🛒</button>
+            <button type="button" onclick="selectCategoryIcon('👗')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">👗</button>
+            <button type="button" onclick="selectCategoryIcon('✂️')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">✂️</button>
+            <button type="button" onclick="selectCategoryIcon('🏊')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🏊</button>
+            <button type="button" onclick="selectCategoryIcon('🎬')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🎬</button>
+            <button type="button" onclick="selectCategoryIcon('🎓')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🎓</button>
+          </div>
+        </div>
+
+        <!-- 4. Kleurenpalet (Voor Initialen of Pictogram Achtergrond) -->
+        <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">4. Achtergrondkleur & Initialen</label>
+          <div id="colorSwatches" class="flex gap-2 overflow-x-auto py-1.5 px-0.5 no-scrollbar">
             <button type="button" onclick="selectColorTile('#1e3a8a', this)" class="color-btn w-8 h-8 rounded-full bg-blue-900 flex-shrink-0 border-2 border-white ring-2 ring-blue-900 shadow-sm"></button>
-            <button type="button" onclick="selectColorTile('#0a1931', this)" class="color-btn w-8 h-8 rounded-full bg-slate-950 flex-shrink-0 border border-slate-300"></button>
+            <button type="button" onclick="selectColorTile('#08142c', this)" class="color-btn w-8 h-8 rounded-full bg-[#08142c] flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#0f766e', this)" class="color-btn w-8 h-8 rounded-full bg-teal-700 flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#15803d', this)" class="color-btn w-8 h-8 rounded-full bg-green-700 flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#b91c1c', this)" class="color-btn w-8 h-8 rounded-full bg-red-700 flex-shrink-0 border border-slate-300"></button>
@@ -350,8 +383,9 @@
       name: '',
       code: '',
       type: 'BARCODE',
-      iconType: 'COLOR',
-      iconData: '#1e3a8a'
+      iconType: 'COLOR', // 'IMAGE', 'ICON', 'COLOR'
+      iconData: '#1e3a8a',
+      iconSymbol: ''
     };
 
     async function requestWakeLock() {
@@ -441,6 +475,7 @@
       return name.slice(0, 2).toUpperCase();
     }
 
+    // --- Render Kaarten (Geforceerd 1:1 Vierkant) ---
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -470,18 +505,24 @@
       filtered.forEach((card) => {
         const origIndex = cards.findIndex(c => c.name === card.name && c.code === card.code);
         const item = document.createElement('div');
-        item.className = 'flex flex-col items-center cursor-pointer active:scale-95 transition-transform group';
+        item.className = 'flex flex-col items-center cursor-pointer active:scale-95 transition-transform group w-full';
         item.onclick = () => showCard(origIndex);
 
         let tileInner = '';
+        let bgStyle = '';
+
         if (card.iconType === 'IMAGE' && card.iconData) {
-          tileInner = `<img src="${card.iconData}" class="w-full h-full object-contain p-2.5 bg-white" onerror="this.parentElement.style.backgroundColor='#1e3a8a'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
+          tileInner = `<img src="${card.iconData}" class="w-full h-full object-cover" onerror="this.parentElement.style.backgroundColor='#1e3a8a'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
+        } else if (card.iconType === 'ICON' && card.iconSymbol) {
+          bgStyle = `background-color: ${card.iconData || '#1e3a8a'};`;
+          tileInner = `<span class="text-4xl drop-shadow">${card.iconSymbol}</span>`;
         } else {
+          bgStyle = `background-color: ${card.iconData || '#1e3a8a'};`;
           tileInner = `<span class="font-bold text-2xl text-white drop-shadow">${getInitials(card.name)}</span>`;
         }
 
         item.innerHTML = `
-          <div class="w-full aspect-square bg-white border border-slate-200/90 group-hover:border-blue-700 rounded-3xl flex items-center justify-center overflow-hidden shadow-sm hover:shadow-md transition" style="${card.iconType !== 'IMAGE' ? `background-color: ${card.iconData || '#1e3a8a'}` : ''}">
+          <div class="w-full aspect-square bg-white border border-slate-200/90 group-hover:border-blue-700 rounded-3xl flex items-center justify-center overflow-hidden shadow-sm hover:shadow-md transition" style="${bgStyle}">
             ${tileInner}
           </div>
           <div class="w-full mt-2 text-center">
@@ -492,6 +533,7 @@
       });
     }
 
+    // --- Show Card ---
     function showCard(index) {
       activeViewingIndex = index;
       const card = cards[index];
@@ -504,8 +546,11 @@
       
       const logoWrapper = document.getElementById('viewLogoWrapper');
       if (card.iconType === 'IMAGE' && card.iconData) {
-        logoWrapper.style.backgroundColor = '#ffffff';
-        logoWrapper.innerHTML = `<img src="${card.iconData}" class="w-full h-full object-contain bg-white p-0.5">`;
+        logoWrapper.style.backgroundColor = 'transparent';
+        logoWrapper.innerHTML = `<img src="${card.iconData}" class="w-full h-full object-cover">`;
+      } else if (card.iconType === 'ICON' && card.iconSymbol) {
+        logoWrapper.style.backgroundColor = card.iconData || '#1e3a8a';
+        logoWrapper.innerHTML = `<span class="text-lg">${card.iconSymbol}</span>`;
       } else {
         logoWrapper.style.backgroundColor = card.iconData || '#1e3a8a';
         logoWrapper.innerHTML = `<span class="text-xs font-bold text-white">${getInitials(card.name)}</span>`;
@@ -598,7 +643,8 @@
         code: card.code,
         type: card.type || 'BARCODE',
         iconType: card.iconType || 'COLOR',
-        iconData: card.iconData || '#1e3a8a'
+        iconData: card.iconData || '#1e3a8a',
+        iconSymbol: card.iconSymbol || ''
       };
 
       goToStep1();
@@ -672,17 +718,29 @@
     function updateTilePreview() {
       const preview = document.getElementById('previewTile');
       if (tempCardData.iconType === 'IMAGE' && tempCardData.iconData) {
-        preview.style.backgroundColor = '#ffffff';
-        preview.innerHTML = `<img src="${tempCardData.iconData}" class="w-full h-full object-contain p-1">`;
+        preview.style.backgroundColor = 'transparent';
+        preview.innerHTML = `<img src="${tempCardData.iconData}" class="w-full h-full object-cover">`;
+      } else if (tempCardData.iconType === 'ICON' && tempCardData.iconSymbol) {
+        preview.style.backgroundColor = tempCardData.iconData || '#1e3a8a';
+        preview.innerHTML = `<span class="text-4xl drop-shadow">${tempCardData.iconSymbol}</span>`;
       } else {
         preview.style.backgroundColor = tempCardData.iconData || '#1e3a8a';
         preview.innerHTML = `<span id="previewInitials">${getInitials(tempCardData.name)}</span>`;
       }
     }
 
+    function selectCategoryIcon(emoji) {
+      tempCardData.iconType = 'ICON';
+      tempCardData.iconSymbol = emoji;
+      updateTilePreview();
+    }
+
     function selectColorTile(hex, clickedBtn) {
-      tempCardData.iconType = 'COLOR';
       tempCardData.iconData = hex;
+      if (tempCardData.iconType === 'IMAGE') {
+        tempCardData.iconType = 'COLOR';
+        tempCardData.iconSymbol = '';
+      }
 
       document.querySelectorAll('#colorSwatches .color-btn').forEach(btn => {
         btn.className = btn.className.replace(/border-2 border-white ring-2 ring-blue-900/g, 'border border-slate-300');
@@ -695,35 +753,65 @@
       updateTilePreview();
     }
 
+    // --- HD Multi-Source Logo Search (Google Images API + HD Resolvers) ---
     async function searchWebLogos() {
       const query = document.getElementById('logoSearchQuery').value.trim() || tempCardData.name;
       const resultsContainer = document.getElementById('onlineLogoResults');
-      resultsContainer.innerHTML = '<span class="text-xs text-slate-400">Zoeken...</span>';
+      resultsContainer.innerHTML = '<span class="text-xs text-slate-400 animate-pulse">HD Logo\'s zoeken over het hele web...</span>';
 
       const clean = query.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const urls = [
-        `https://logo.clearbit.com/${clean}.be`,
-        `https://logo.clearbit.com/${clean}.com`,
-        `https://logo.clearbit.com/${clean}.nl`,
-        `https://www.google.com/s2/favicons?domain=${clean}.be&sz=128`,
-        `https://www.google.com/s2/favicons?domain=${clean}.com&sz=128`
-      ];
+      const candidates = new Set();
+
+      // 1. Directe HD Providers
+      candidates.add(`https://logo.clearbit.com/${clean}.be?size=512`);
+      candidates.add(`https://logo.clearbit.com/${clean}.com?size=512`);
+      candidates.add(`https://logo.clearbit.com/${clean}.nl?size=512`);
+      candidates.add(`https://unavatar.io/${clean}.be?fallback=false`);
+      candidates.add(`https://unavatar.io/${clean}.com?fallback=false`);
+      candidates.add(`https://icons.duckduckgo.com/ip3/${clean}.be.ico`);
+      candidates.add(`https://icons.duckduckgo.com/ip3/${clean}.com.ico`);
+
+      // 2. Google Direct Image Search API (Vindt ook lokale handelszaken, apotheken, chocolatiers)
+      try {
+        const gRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query + ' logo belgie')}`)}`);
+        const html = await gRes.text();
+        const imgRegex = /src="(https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=[^"]+)"/g;
+        let match;
+        let count = 0;
+        while ((match = imgRegex.exec(html)) !== null && count < 8) {
+          candidates.add(match[1]);
+          count++;
+        }
+      } catch (e) {}
 
       resultsContainer.innerHTML = '';
-      urls.forEach((url) => {
+      if (candidates.size === 0) {
+        resultsContainer.innerHTML = '<span class="text-xs text-slate-400">Geen logo\'s gevonden. Neem een foto of kies categorie.</span>';
+        return;
+      }
+
+      candidates.forEach((url) => {
         const imgBtn = document.createElement('button');
         imgBtn.type = 'button';
-        imgBtn.className = 'w-12 h-12 bg-white rounded-xl p-1 border-2 border-slate-200 flex-shrink-0 flex items-center justify-center hover:border-blue-700 transition overflow-hidden shadow-sm';
-        imgBtn.innerHTML = `<img src="${url}" class="max-w-full max-h-full object-contain" onerror="this.parentElement.remove()">`;
+        imgBtn.className = 'w-12 h-12 bg-white rounded-2xl p-1 border-2 border-slate-200 flex-shrink-0 flex items-center justify-center hover:border-blue-700 transition overflow-hidden shadow-sm aspect-square';
+        
+        const testImg = document.createElement('img');
+        testImg.src = url;
+        testImg.className = 'w-full h-full object-contain';
+        testImg.onerror = () => imgBtn.remove();
+        
+        imgBtn.appendChild(testImg);
         imgBtn.onclick = () => {
           tempCardData.iconType = 'IMAGE';
           tempCardData.iconData = url;
+          tempCardData.iconSymbol = '';
           updateTilePreview();
         };
         resultsContainer.appendChild(imgBtn);
       });
     }
 
+    // --- Foto met Automatische 1:1 Center-Square Crop ---
     function handleCardPhotoUpload(input) {
       if (!input.files || input.files.length === 0) return;
       const file = input.files[0];
@@ -733,18 +821,21 @@
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
-          const maxDim = 200;
-          let w = img.width;
-          let h = img.height;
-          if (w > h) { h = (h / w) * maxDim; w = maxDim; } 
-          else { w = (w / h) * maxDim; h = maxDim; }
-          canvas.width = w;
-          canvas.height = h;
+          const cropSize = 350; // Scherpe vierkante resolutie
+          canvas.width = cropSize;
+          canvas.height = cropSize;
           const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
+
+          // Bereken center-square crop
+          const minDim = Math.min(img.width, img.height);
+          const startX = (img.width - minDim) / 2;
+          const startY = (img.height - minDim) / 2;
+
+          ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, cropSize, cropSize);
           
           tempCardData.iconType = 'IMAGE';
-          tempCardData.iconData = canvas.toDataURL('image/jpeg', 0.8);
+          tempCardData.iconData = canvas.toDataURL('image/jpeg', 0.88);
+          tempCardData.iconSymbol = '';
           updateTilePreview();
         };
         img.src = e.target.result;
@@ -759,6 +850,7 @@
         type: tempCardData.type,
         iconType: tempCardData.iconType,
         iconData: tempCardData.iconData,
+        iconSymbol: tempCardData.iconSymbol || '',
         openCount: editingIndex !== null ? (cards[editingIndex].openCount || 0) : 0
       };
 
@@ -773,7 +865,7 @@
       closeModal('addModal');
     }
 
-    // 9. Backup & Restore
+    // --- Backup & Restore ---
     async function exportBackup() {
       if (cards.length === 0) {
         showAppAlert("Er zijn nog geen kaarten om een backup van te maken.", "Geen Kaarten", "ℹ️");
@@ -847,7 +939,7 @@
       reader.readAsText(file);
     }
 
-    // 10. Forceren van Update
+    // --- Update Checker ---
     async function checkForAppUpdate() {
       const icon = document.getElementById('updateIcon');
       icon.classList.add('animate-spin');
@@ -873,7 +965,7 @@
       }
     }
 
-    // 11. Helper Functies
+    // --- Helper Functions ---
     function setType(type) {
       currentSelectedType = type;
       const bBtn = document.getElementById('typeBarcodeBtn');
@@ -899,7 +991,7 @@
       return 'BARCODE';
     }
 
-    // 12. Scanner Logica
+    // --- Scanner Logic ---
     async function toggleScanner() {
       if (isCameraBusy) return;
       const container = document.getElementById('scanner-container');
