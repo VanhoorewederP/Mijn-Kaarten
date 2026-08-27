@@ -23,7 +23,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-    /* 1. Safe Area Support voor Dynamic Island, Notch en Swipe Bar */
     :root {
       --sat: env(safe-area-inset-top, 0px);
       --sab: env(safe-area-inset-bottom, 0px);
@@ -35,6 +34,8 @@
       padding-top: var(--sat);
       padding-left: var(--sal);
       padding-right: var(--sar);
+      margin: 0;
+      background-color: #020617;
     }
 
     header {
@@ -45,23 +46,18 @@
       padding-bottom: max(0.5rem, var(--sab));
     }
 
-    /* --- HARD FORCED PORTRAIT TRICK VOOR IOS --- */
-    @media screen and (orientation: landscape) and (max-height: 550px) {
-      body {
+    /* --- Geforceerde Portretstand bij kantelen (iOS & Android) --- */
+    @media screen and (orientation: landscape) {
+      #appContainer {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         width: 100vh !important;
         height: 100vw !important;
-        transform: rotate(-90deg) translate(-100vw, 0) !important;
+        transform: rotate(-90deg) translateX(-100vh) !important;
         transform-origin: top left !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
-      }
-      
-      /* Houd modals en vaste navigatiebalken perfect binnen de geroteerde container */
-      nav.fixed, .fixed {
-        position: absolute !important;
       }
     }
 
@@ -69,241 +65,246 @@
     input[type="text"] { font-size: 16px; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans select-none antialiased">
-  <!-- Header -->
-  <header class="px-4 pb-3 bg-slate-900/95 backdrop-blur shadow-md sticky top-0 z-20 border-b border-slate-800 flex flex-col gap-3">
-    <div class="flex justify-between items-center">
-      <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-        <span>💳</span> Mijn Kaarten
-      </h1>
-      <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow">
-        + Nieuw
-      </button>
-    </div>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans select-none antialiased">
+  <!-- Alles in appContainer wikkelen -->
+  <div id="appContainer" class="min-h-screen flex flex-col">
 
-    <!-- Zoekbalk & Sorteerknop -->
-    <div class="flex gap-2">
-      <div class="relative flex-1">
-        <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 pointer-events-none">🔍</span>
-        <input id="searchInput" oninput="renderCards()" type="text" placeholder="Zoek kaart..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 text-white placeholder-slate-500">
-      </div>
-      <button onclick="toggleSort()" id="sortBtn" class="bg-slate-800 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1">
-        <span>🔤</span> <span id="sortLabel">A-Z</span>
-      </button>
-    </div>
-
-    <div class="flex gap-2 px-4 py-2 bg-slate-900 border-b border-slate-800">
-      <button onclick="exportBackup()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
-        <span>💾</span> Backup
-      </button>
-      <button onclick="document.getElementById('importFileInput').click()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
-        <span>📥</span> Herstel
-      </button>
-      <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importBackup(this)">
-    </div>
-  </header>
-
-  <!-- Kaartenlijst: 2 kolommen naast elkaar -->
-  <main class="p-3 max-w-lg w-full mx-auto flex-1">
-    <div id="cardList" class="grid grid-cols-2 gap-3"></div>
-  </main>
-
-  <!-- Bottom Navigation Bar -->
-  <nav class="fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 z-30 px-6 py-2 flex justify-around items-center">
-    <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center gap-1 text-blue-500 py-1 transition">
-      <span class="text-xl">🗂️</span>
-      <span class="text-xs font-semibold">Alle Kaarten</span>
-    </button>
-    <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center gap-1 text-slate-400 py-1 transition">
-      <span class="text-xl">⭐</span>
-      <span class="text-xs font-semibold">Vaakst Gebruikt</span>
-    </button>
-    <!-- Update Knop -->
-    <button onclick="checkForAppUpdate()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 transition">
-      <span class="text-xl" id="updateIcon">🔄</span>
-      <span class="text-xs font-semibold">Update</span>
-    </button>
-  </nav>
-
-  <!-- Modal: Toon Code + Bewerken & Verwijderen -->
-  <div id="viewModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
-    <div id="viewModalContent" class="bg-white text-slate-900 w-full max-w-sm rounded-3xl p-6 flex flex-col items-center gap-4 text-center shadow-2xl my-auto">
-      
-      <!-- Top in modal -->
-      <div class="w-full flex justify-between items-center border-b pb-3">
-        <div class="flex items-center gap-2.5 truncate">
-          <div id="viewLogoWrapper" class="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"></div>
-          <h2 id="viewTitle" class="text-xl font-extrabold truncate text-slate-800 text-left"></h2>
-        </div>
-        <button onclick="closeModal('viewModal')" class="text-slate-400 hover:text-slate-700 text-xl font-bold px-2">✕</button>
-      </div>
-      
-      <!-- Renderplek barcode / QR -->
-      <div class="w-full flex justify-center py-4 px-2 items-center bg-white rounded-2xl overflow-hidden min-h-[160px]">
-        <svg id="barcodeCanvas" class="max-w-full hidden"></svg>
-        <div id="qrcodeCanvas" class="hidden flex justify-center"></div>
-      </div>
-
-      <div class="w-full bg-slate-100 p-2.5 rounded-xl">
-        <p id="viewCode" class="font-mono text-sm tracking-wider font-bold text-slate-700 break-all select-all"></p>
-      </div>
-      
-      <!-- Actieknoppen -->
-      <div class="w-full flex flex-col gap-2 pt-2 border-t border-slate-100">
-        <div class="flex gap-2">
-          <button onclick="editCurrentCard()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3 rounded-xl font-semibold text-sm transition active:scale-95 flex items-center justify-center gap-1.5">
-            <span>✏️</span> Bewerken
-          </button>
-          <button onclick="closeModal('viewModal')" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-bold text-sm transition active:scale-95 shadow">
-            Klaar
-          </button>
-        </div>
-        <button onclick="deleteCurrentCard()" class="w-full py-2 text-xs font-semibold text-red-500 hover:text-red-700 transition">
-          🗑️ Kaart Verwijderen
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Kaart Toevoegen / Bewerken Wizard -->
-  <div id="addModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden z-40 overflow-y-auto" onclick="closeModalOnBgClick(event)">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-5 sm:p-6 flex flex-col gap-4 text-white shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
-      
-      <!-- Header -->
-      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
-        <h2 id="wizardTitle" class="text-lg font-bold">Stap 1: Scan & Geef Naam</h2>
-        <button onclick="closeModal('addModal')" class="text-slate-400 hover:text-white text-lg font-bold p-1">✕</button>
-      </div>
-
-      <!-- Duplicaat waarschuwing -->
-      <div id="duplicateAlert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 flex flex-col gap-2">
-        <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold">
-          <span>⚠️</span> <span id="duplicateAlertText"></span>
-        </div>
-        <button id="goToDuplicateBtn" type="button" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-1.5 px-3 rounded-xl self-start transition">
-          Bekijk bestaande kaart →
+    <!-- Header -->
+    <header class="px-4 pb-3 bg-slate-900/95 backdrop-blur shadow-md sticky top-0 z-20 border-b border-slate-800 flex flex-col gap-3">
+      <div class="flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          <span>💳</span> Mijn Kaarten
+        </h1>
+        <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow">
+          + Nieuw
         </button>
       </div>
 
-      <!-- STAP 1: CODE & NAAM -->
-      <div id="wizardStep1" class="flex flex-col gap-4">
-        <!-- Scanner Container -->
-        <div id="scanner-container" class="hidden overflow-hidden rounded-2xl bg-black border-2 border-blue-500 relative">
-          <div id="reader" style="width: 100%; min-height: 180px;"></div>
+      <!-- Zoekbalk & Sorteerknop -->
+      <div class="flex gap-2">
+        <div class="relative flex-1">
+          <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 pointer-events-none">🔍</span>
+          <input id="searchInput" oninput="renderCards()" type="text" placeholder="Zoek kaart..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 text-white placeholder-slate-500">
+        </div>
+        <button onclick="toggleSort()" id="sortBtn" class="bg-slate-800 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1">
+          <span>🔤</span> <span id="sortLabel">A-Z</span>
+        </button>
+      </div>
+
+      <div class="flex gap-2 px-4 py-2 bg-slate-900 border-b border-slate-800">
+        <button onclick="exportBackup()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
+          <span>💾</span> Backup
+        </button>
+        <button onclick="document.getElementById('importFileInput').click()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
+          <span>📥</span> Herstel
+        </button>
+        <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importBackup(this)">
+      </div>
+    </header>
+
+    <!-- Kaartenlijst: 2 kolommen naast elkaar -->
+    <main class="p-3 max-w-lg w-full mx-auto flex-1">
+      <div id="cardList" class="grid grid-cols-2 gap-3"></div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 z-30 px-6 py-2 flex justify-around items-center">
+      <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center gap-1 text-blue-500 py-1 transition">
+        <span class="text-xl">🗂️</span>
+        <span class="text-xs font-semibold">Alle Kaarten</span>
+      </button>
+      <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center gap-1 text-slate-400 py-1 transition">
+        <span class="text-xl">⭐</span>
+        <span class="text-xs font-semibold">Vaakst Gebruikt</span>
+      </button>
+      <!-- Update Knop -->
+      <button onclick="checkForAppUpdate()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 transition">
+        <span class="text-xl" id="updateIcon">🔄</span>
+        <span class="text-xs font-semibold">Update</span>
+      </button>
+    </nav>
+
+    <!-- Modal: Toon Code + Bewerken & Verwijderen -->
+    <div id="viewModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
+      <div id="viewModalContent" class="bg-white text-slate-900 w-full max-w-sm rounded-3xl p-6 flex flex-col items-center gap-4 text-center shadow-2xl my-auto">
+        
+        <!-- Top in modal -->
+        <div class="w-full flex justify-between items-center border-b pb-3">
+          <div class="flex items-center gap-2.5 truncate">
+            <div id="viewLogoWrapper" class="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0"></div>
+            <h2 id="viewTitle" class="text-xl font-extrabold truncate text-slate-800 text-left"></h2>
+          </div>
+          <button onclick="closeModal('viewModal')" class="text-slate-400 hover:text-slate-700 text-xl font-bold px-2">✕</button>
         </div>
         
-        <div class="grid grid-cols-2 gap-2.5">
-          <button id="scanBtn" onclick="toggleScanner()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition active:scale-95">
-            <span id="scanBtnIcon">📷</span> <span id="scanBtnText">Camera</span>
-          </button>
-          <button onclick="triggerFileImport()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition active:scale-95">
-            🖼️ Screenshot
-          </button>
-          <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="importFromImage(this)">
+        <!-- Renderplek barcode / QR -->
+        <div class="w-full flex justify-center py-4 px-2 items-center bg-white rounded-2xl overflow-hidden min-h-[160px]">
+          <svg id="barcodeCanvas" class="max-w-full hidden"></svg>
+          <div id="qrcodeCanvas" class="hidden flex justify-center"></div>
         </div>
 
-        <div class="flex flex-col gap-3">
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Winkelnaam</label>
-            <input id="cardName" type="text" placeholder="bv. Colruyt, Delhaize, Decathlon" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 mt-1 focus:outline-none focus:border-blue-500 text-white">
+        <div class="w-full bg-slate-100 p-2.5 rounded-xl">
+          <p id="viewCode" class="font-mono text-sm tracking-wider font-bold text-slate-700 break-all select-all"></p>
+        </div>
+        
+        <!-- Actieknoppen -->
+        <div class="w-full flex flex-col gap-2 pt-2 border-t border-slate-100">
+          <div class="flex gap-2">
+            <button onclick="editCurrentCard()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3 rounded-xl font-semibold text-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+              <span>✏️</span> Bewerken
+            </button>
+            <button onclick="closeModal('viewModal')" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-bold text-sm transition active:scale-95 shadow">
+              Klaar
+            </button>
+          </div>
+          <button onclick="deleteCurrentCard()" class="w-full py-2 text-xs font-semibold text-red-500 hover:text-red-700 transition">
+            🗑️ Kaart Verwijderen
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Kaart Toevoegen / Bewerken Wizard -->
+    <div id="addModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden z-40 overflow-y-auto" onclick="closeModalOnBgClick(event)">
+      <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-5 sm:p-6 flex flex-col gap-4 text-white shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+          <h2 id="wizardTitle" class="text-lg font-bold">Stap 1: Scan & Geef Naam</h2>
+          <button onclick="closeModal('addModal')" class="text-slate-400 hover:text-white text-lg font-bold p-1">✕</button>
+        </div>
+
+        <!-- Duplicaat waarschuwing -->
+        <div id="duplicateAlert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 flex flex-col gap-2">
+          <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold">
+            <span>⚠️</span> <span id="duplicateAlertText"></span>
+          </div>
+          <button id="goToDuplicateBtn" type="button" class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-1.5 px-3 rounded-xl self-start transition">
+            Bekijk bestaande kaart →
+          </button>
+        </div>
+
+        <!-- STAP 1: CODE & NAAM -->
+        <div id="wizardStep1" class="flex flex-col gap-4">
+          <!-- Scanner Container -->
+          <div id="scanner-container" class="hidden overflow-hidden rounded-2xl bg-black border-2 border-blue-500 relative">
+            <div id="reader" style="width: 100%; min-height: 180px;"></div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2.5">
+            <button id="scanBtn" onclick="toggleScanner()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition active:scale-95">
+              <span id="scanBtnIcon">📷</span> <span id="scanBtnText">Camera</span>
+            </button>
+            <button onclick="triggerFileImport()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition active:scale-95">
+              🖼️ Screenshot
+            </button>
+            <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="importFromImage(this)">
           </div>
 
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Code / Barcode</label>
-            <input id="cardNumber" type="text" placeholder="Scan of typ code" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 mt-1 font-mono text-sm focus:outline-none focus:border-blue-500 text-white">
-          </div>
+          <div class="flex flex-col gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Winkelnaam</label>
+              <input id="cardName" type="text" placeholder="bv. Colruyt, Delhaize, Decathlon" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 mt-1 focus:outline-none focus:border-blue-500 text-white">
+            </div>
 
-          <div>
-            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Formaat</label>
-            <div class="grid grid-cols-2 gap-2 mt-1">
-              <button type="button" id="typeBarcodeBtn" onclick="setType('BARCODE')" class="py-2 rounded-xl text-xs font-bold border border-slate-700 bg-blue-600 text-white transition">Streepjescode</button>
-              <button type="button" id="typeQrBtn" onclick="setType('QR_CODE')" class="py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 transition">QR-Code</button>
+            <div>
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Code / Barcode</label>
+              <input id="cardNumber" type="text" placeholder="Scan of typ code" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 mt-1 font-mono text-sm focus:outline-none focus:border-blue-500 text-white">
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Formaat</label>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <button type="button" id="typeBarcodeBtn" onclick="setType('BARCODE')" class="py-2 rounded-xl text-xs font-bold border border-slate-700 bg-blue-600 text-white transition">Streepjescode</button>
+                <button type="button" id="typeQrBtn" onclick="setType('QR_CODE')" class="py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 transition">QR-Code</button>
+              </div>
             </div>
           </div>
+
+          <div class="flex gap-2.5 pt-2">
+            <button onclick="closeModal('addModal')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold transition active:scale-95">Annuleren</button>
+            <button onclick="goToStep2()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-xl text-sm font-bold transition shadow active:scale-95">Volgende: Icoon →</button>
+          </div>
         </div>
 
-        <div class="flex gap-2.5 pt-2">
-          <button onclick="closeModal('addModal')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold transition active:scale-95">Annuleren</button>
-          <button onclick="goToStep2()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-xl text-sm font-bold transition shadow active:scale-95">Volgende: Icoon →</button>
+        <!-- STAP 2: LOGO / AFBEELDING / INITIALEN KIEZEN -->
+        <div id="wizardStep2" class="hidden flex flex-col gap-4">
+          
+          <!-- Preview van de tegel -->
+          <div class="flex flex-col items-center justify-center p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase mb-2">Voorbeeld Tegel</span>
+            <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-inner bg-blue-600 text-white overflow-hidden p-1">
+              <span id="previewInitials">CO</span>
+            </div>
+            <span id="previewName" class="text-sm font-bold text-white mt-2 truncate max-w-[150px]">Colruyt</span>
+          </div>
+
+          <!-- Optie A: Online Logo Zoeken -->
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">1. Online Logo Zoeken</label>
+            <div class="flex gap-2">
+              <input id="logoSearchQuery" type="text" placeholder="bv. Colruyt logo" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
+              <button onclick="searchWebLogos()" type="button" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold">Zoek</button>
+            </div>
+            <div id="onlineLogoResults" class="flex gap-2 overflow-x-auto py-1 min-h-[50px] items-center">
+              <span class="text-xs text-slate-500">Klik op 'Zoek' voor suggesties</span>
+            </div>
+          </div>
+
+          <!-- Optie B: Foto van Fysieke Kaart -->
+          <div class="flex flex-col gap-2 border-t border-slate-800 pt-3">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">2. Foto van Fysieke Kaart</label>
+            <button onclick="document.getElementById('cardPhotoInput').click()" type="button" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
+              📸 Neem Foto van Kaart
+            </button>
+            <input type="file" id="cardPhotoInput" accept="image/*" capture="environment" class="hidden" onchange="handleCardPhotoUpload(this)">
+          </div>
+
+          <!-- Optie C: Kleur & Initialen -->
+          <div class="flex flex-col gap-2 border-t border-slate-800 pt-3">
+            <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">3. Of kies Kleur & Initialen</label>
+            <div id="colorSwatches" class="flex gap-2 overflow-x-auto py-1.5 px-0.5">
+              <button type="button" onclick="selectColorTile('#2563eb', this)" class="color-btn w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 border-2 border-white ring-2 ring-blue-400"></button>
+              <button type="button" onclick="selectColorTile('#16a34a', this)" class="color-btn w-8 h-8 rounded-full bg-green-600 flex-shrink-0 border border-slate-700"></button>
+              <button type="button" onclick="selectColorTile('#dc2626', this)" class="color-btn w-8 h-8 rounded-full bg-red-600 flex-shrink-0 border border-slate-700"></button>
+              <button type="button" onclick="selectColorTile('#ea580c', this)" class="color-btn w-8 h-8 rounded-full bg-orange-600 flex-shrink-0 border border-slate-700"></button>
+              <button type="button" onclick="selectColorTile('#9333ea', this)" class="color-btn w-8 h-8 rounded-full bg-purple-600 flex-shrink-0 border border-slate-700"></button>
+              <button type="button" onclick="selectColorTile('#0d9488', this)" class="color-btn w-8 h-8 rounded-full bg-teal-600 flex-shrink-0 border border-slate-700"></button>
+              <button type="button" onclick="selectColorTile('#e11d48', this)" class="color-btn w-8 h-8 rounded-full bg-rose-600 flex-shrink-0 border border-slate-700"></button>
+              <button type="button" onclick="selectColorTile('#334155', this)" class="color-btn w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 border border-slate-700"></button>
+            </div>
+          </div>
+
+          <div class="flex gap-2.5 pt-3 border-t border-slate-800">
+            <button onclick="goToStep1()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold transition">← Terug</button>
+            <button onclick="saveFinalCard()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-xl text-sm font-bold transition shadow">Opslaan</button>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- STAP 2: LOGO / AFBEELDING / INITIALEN KIEZEN -->
-      <div id="wizardStep2" class="hidden flex flex-col gap-4">
-        
-        <!-- Preview van de tegel -->
-        <div class="flex flex-col items-center justify-center p-3 bg-slate-950 border border-slate-800 rounded-2xl">
-          <span class="text-[11px] font-semibold text-slate-400 uppercase mb-2">Voorbeeld Tegel</span>
-          <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-inner bg-blue-600 text-white overflow-hidden p-1">
-            <span id="previewInitials">CO</span>
+    <!-- Aangepaste Universele Dialog Modal -->
+      <div id="dialogModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-xs rounded-3xl p-6 flex flex-col items-center gap-4 text-center shadow-2xl animate-fade-in">
+          <div id="dialogIcon" class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-2xl">
+            ℹ️
           </div>
-          <span id="previewName" class="text-sm font-bold text-white mt-2 truncate max-w-[150px]">Colruyt</span>
-        </div>
-
-        <!-- Optie A: Online Logo Zoeken -->
-        <div class="flex flex-col gap-2">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">1. Online Logo Zoeken</label>
-          <div class="flex gap-2">
-            <input id="logoSearchQuery" type="text" placeholder="bv. Colruyt logo" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
-            <button onclick="searchWebLogos()" type="button" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold">Zoek</button>
+          <div class="flex flex-col gap-1.5">
+            <h3 id="dialogTitle" class="text-base font-bold text-white">Melding</h3>
+            <p id="dialogMessage" class="text-xs text-slate-400 leading-relaxed"></p>
           </div>
-          <div id="onlineLogoResults" class="flex gap-2 overflow-x-auto py-1 min-h-[50px] items-center">
-            <span class="text-xs text-slate-500">Klik op 'Zoek' voor suggesties</span>
+          <div class="flex gap-2 w-full pt-1">
+            <button id="dialogCancelBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold transition active:scale-95 hidden">
+              Annuleren
+            </button>
+            <button id="dialogConfirmBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold transition shadow active:scale-95">
+              Begrepen
+            </button>
           </div>
-        </div>
-
-        <!-- Optie B: Foto van Fysieke Kaart -->
-        <div class="flex flex-col gap-2 border-t border-slate-800 pt-3">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">2. Foto van Fysieke Kaart</label>
-          <button onclick="document.getElementById('cardPhotoInput').click()" type="button" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
-            📸 Neem Foto van Kaart
-          </button>
-          <input type="file" id="cardPhotoInput" accept="image/*" capture="environment" class="hidden" onchange="handleCardPhotoUpload(this)">
-        </div>
-
-        <!-- Optie C: Kleur & Initialen -->
-        <div class="flex flex-col gap-2 border-t border-slate-800 pt-3">
-          <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">3. Of kies Kleur & Initialen</label>
-          <div id="colorSwatches" class="flex gap-2 overflow-x-auto py-1.5 px-0.5">
-            <button type="button" onclick="selectColorTile('#2563eb', this)" class="color-btn w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 border-2 border-white ring-2 ring-blue-400"></button>
-            <button type="button" onclick="selectColorTile('#16a34a', this)" class="color-btn w-8 h-8 rounded-full bg-green-600 flex-shrink-0 border border-slate-700"></button>
-            <button type="button" onclick="selectColorTile('#dc2626', this)" class="color-btn w-8 h-8 rounded-full bg-red-600 flex-shrink-0 border border-slate-700"></button>
-            <button type="button" onclick="selectColorTile('#ea580c', this)" class="color-btn w-8 h-8 rounded-full bg-orange-600 flex-shrink-0 border border-slate-700"></button>
-            <button type="button" onclick="selectColorTile('#9333ea', this)" class="color-btn w-8 h-8 rounded-full bg-purple-600 flex-shrink-0 border border-slate-700"></button>
-            <button type="button" onclick="selectColorTile('#0d9488', this)" class="color-btn w-8 h-8 rounded-full bg-teal-600 flex-shrink-0 border border-slate-700"></button>
-            <button type="button" onclick="selectColorTile('#e11d48', this)" class="color-btn w-8 h-8 rounded-full bg-rose-600 flex-shrink-0 border border-slate-700"></button>
-            <button type="button" onclick="selectColorTile('#334155', this)" class="color-btn w-8 h-8 rounded-full bg-slate-700 flex-shrink-0 border border-slate-700"></button>
-          </div>
-        </div>
-
-        <div class="flex gap-2.5 pt-3 border-t border-slate-800">
-          <button onclick="goToStep1()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-sm font-semibold transition">← Terug</button>
-          <button onclick="saveFinalCard()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-3 rounded-xl text-sm font-bold transition shadow">Opslaan</button>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Aangepaste Universele Dialog Modal -->
-    <div id="dialogModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-      <div class="bg-slate-900 border border-slate-800 w-full max-w-xs rounded-3xl p-6 flex flex-col items-center gap-4 text-center shadow-2xl animate-fade-in">
-        <div id="dialogIcon" class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-2xl">
-          ℹ️
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <h3 id="dialogTitle" class="text-base font-bold text-white">Melding</h3>
-          <p id="dialogMessage" class="text-xs text-slate-400 leading-relaxed"></p>
-        </div>
-        <div class="flex gap-2 w-full pt-1">
-          <button id="dialogCancelBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-xl text-xs font-semibold transition active:scale-95 hidden">
-            Annuleren
-          </button>
-          <button id="dialogConfirmBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl text-xs font-bold transition shadow active:scale-95">
-            Begrepen
-          </button>
-        </div>
-      </div>
-    </div>
 
   <script>
     // --- Universele Custom Popup Handler ---
