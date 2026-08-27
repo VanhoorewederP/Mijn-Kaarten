@@ -31,7 +31,7 @@
     .navy-mesh-gradient {
       background: linear-gradient(135deg, #08142c 0%, #0e2a66 45%, #1d4ed8 80%, #1e40af 100%);
     }
-    
+
     html {
       background-color: #08142c; /* Exact dezelfde kleur als de header */
     }
@@ -45,6 +45,18 @@
       background-color: #ffffff;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: none; /* Schakelt iOS overscroll bounce uit */
+    }
+
+    /* Trekt de header optisch 500px door naar boven, zodat de kinetische overshoot 100% donkerblauw blijft */
+    header::before {
+      content: '';
+      position: absolute;
+      top: -500px;
+      left: 0;
+      right: 0;
+      height: 500px;
+      background-color: #08142c;
+      pointer-events: none;
     }
 
     .header-box {
