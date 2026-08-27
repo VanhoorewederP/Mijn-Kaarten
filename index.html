@@ -23,20 +23,54 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-    #reader video { object-fit: cover; border-radius: 0.75rem; width: 100% !important; }
-    input[type="text"] { font-size: 16px; }
-    @media screen and (orientation: landscape) and (max-height: 500px) {
-      body {
-        max-width: 420px;
-        margin: 0 auto;
+    /* 1. Safe Area Support voor Dynamic Island, Notch en Swipe Bar */
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+
+    body {
+      padding-top: var(--sat);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+    }
+
+    /* Vaste header en navigatiebalk rekening laten houden met Dynamic Island & Home indicator */
+    header {
+      padding-top: max(1rem, var(--sat));
+    }
+
+    nav {
+      padding-bottom: max(0.5rem, var(--sab));
+    }
+
+    /* 2. Landscape Blokker voor iOS */
+    @media screen and (orientation: landscape) and (max-height: 550px) {
+      #iosLandscapeBlocker {
+        display: flex !important;
       }
     }
+
+    #reader video { object-fit: cover; border-radius: 0.75rem; width: 100% !important; }
+    input[type="text"] { font-size: 16px; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-full flex flex-col font-sans select-none antialiased pb-28">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans select-none antialiased">
+  <!-- Landscape Blokkade Scherm (iOS Fallback) -->
+  <div id="iosLandscapeBlocker" class="fixed inset-0 bg-slate-950 z-[9999] hidden flex-col items-center justify-center p-6 text-center text-white select-none">
+    <div class="w-16 h-16 rounded-3xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-3xl mb-4 animate-bounce">
+      📱
+    </div>
+    <h2 class="text-lg font-bold">Draai je iPhone rechtop</h2>
+    <p class="text-xs text-slate-400 mt-1 max-w-xs leading-relaxed">
+      Deze app is ontworpen om uitsluitend in portretstand te gebruiken.
+    </p>
+  </div>
 
   <!-- Header -->
-  <header class="p-4 bg-slate-900/90 backdrop-blur shadow-md sticky top-0 z-20 border-b border-slate-800 flex flex-col gap-3">
+  <header class="px-4 pb-3 bg-slate-900/95 backdrop-blur shadow-md sticky top-0 z-20 border-b border-slate-800 flex flex-col gap-3">
     <div class="flex justify-between items-center">
       <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
         <span>💳</span> Mijn Kaarten
