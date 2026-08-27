@@ -32,16 +32,8 @@
       background: linear-gradient(135deg, #08142c 0%, #0e2a66 45%, #1d4ed8 80%, #1e40af 100%);
     }
 
-    /* Voorkomt Chrome long-press popup en image dragging op Android */
-    img {
-      pointer-events: none !important;
-      -webkit-user-drag: none;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
     html {
-      background-color: #08142c; /* Exact dezelfde kleur als de header */
+      background-color: #08142c;
     }
 
     body {
@@ -52,19 +44,7 @@
       margin: 0;
       background-color: #ffffff;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: none; /* Schakelt iOS overscroll bounce uit */
-    }
-
-    /* Trekt de header optisch 500px door naar boven, zodat de kinetische overshoot 100% donkerblauw blijft */
-    header::before {
-      content: '';
-      position: absolute;
-      top: -500px;
-      left: 0;
-      right: 0;
-      height: 500px;
-      background-color: #08142c;
-      pointer-events: none;
+      overscroll-behavior-y: none;
     }
 
     .header-box {
@@ -73,6 +53,14 @@
 
     .nav-box {
       padding-bottom: max(0.75rem, var(--sab));
+    }
+
+    /* Blokkeer Android Chrome popups bij lang indrukken */
+    img {
+      pointer-events: none !important;
+      -webkit-user-drag: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
@@ -96,7 +84,7 @@
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white pb-32" oncontextmenu="return false;">
 
-  <!-- Header -->
+  <!-- BOVENSTE VAK: Enkele, perfect uitgelijnde Sticky Header -->
   <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-blue-400/20">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
@@ -119,23 +107,26 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht -->
+  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (Geen overtollige witruimte) -->
   <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
   <!-- ONDERSTE VAK: Vloeiende Dock Navigatie -->
   <nav class="fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-blue-400/20 z-30 px-6 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(8,20,44,0.35)]">
+    <!-- Links: Alle Kaarten -->
     <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">🗂️</span>
       <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
 
+    <!-- Midden: Vaakst Gebruikt -->
     <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]">
       <span class="text-xl leading-none">⭐</span>
       <span class="text-[11px] font-extrabold tracking-tight">Vaakst Gebruikt</span>
     </button>
 
+    <!-- Rechts: Beheer -->
     <button onclick="openManageModal()" id="tabManageBtn" class="flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">⚙️</span>
       <span class="text-[11px] font-semibold tracking-tight">Beheer</span>
@@ -490,7 +481,6 @@
       return name.slice(0, 2).toUpperCase();
     }
 
-    // --- Render Kaarten: Altijd 1:1 Vierkant & Originele Beeldkwaliteit ---
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -768,7 +758,6 @@
       updateTilePreview();
     }
 
-    // --- Zuivere HD Logo Zoeker (Google HD Favicons + Vector Resolvers) ---
     async function searchWebLogos() {
       const query = document.getElementById('logoSearchQuery').value.trim() || tempCardData.name;
       const resultsContainer = document.getElementById('onlineLogoResults');
@@ -777,20 +766,14 @@
       const clean = query.toLowerCase().replace(/[^a-z0-9]/g, '');
       const candidates = new Set();
 
-      // 1. Google 128px HD Favicons (Geen kwaliteitsverlies)
       candidates.add(`https://www.google.com/s2/favicons?domain=${clean}.be&sz=128`);
       candidates.add(`https://www.google.com/s2/favicons?domain=${clean}.com&sz=128`);
       candidates.add(`https://www.google.com/s2/favicons?domain=${clean}.nl&sz=128`);
-      candidates.add(`https://www.google.com/s2/favicons?domain=keurslager.be&sz=128`);
-      candidates.add(`https://www.google.com/s2/favicons?domain=keurslager.nl&sz=128`);
-
-      // 2. Clearbit & Unavatar HD
       candidates.add(`https://logo.clearbit.com/${clean}.be?size=256`);
       candidates.add(`https://logo.clearbit.com/${clean}.com?size=256`);
       candidates.add(`https://unavatar.io/${clean}.be`);
       candidates.add(`https://unavatar.io/${clean}.com`);
 
-      // 3. DuckDuckGo directe afbeeldingsbronnen
       try {
         const ddgRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://duckduckgo.com/i.js?q=${encodeURIComponent(query + ' logo')}&o=json`)}`);
         const ddgData = await ddgRes.json();
@@ -819,7 +802,6 @@
         
         imgBtn.appendChild(testImg);
         imgBtn.onclick = () => {
-          // Direct de originele, onvervormde URL toekennen
           tempCardData.iconType = 'IMAGE';
           tempCardData.iconData = url;
           tempCardData.iconSymbol = '';
@@ -829,7 +811,6 @@
       });
     }
 
-    // --- Foto met Automatische 1:1 Center-Square Crop ---
     function handleCardPhotoUpload(input) {
       if (!input.files || input.files.length === 0) return;
       const file = input.files[0];
@@ -884,7 +865,6 @@
       closeModal('addModal');
     }
 
-    // --- Backup & Restore ---
     async function exportBackup() {
       if (cards.length === 0) {
         showAppAlert("Er zijn nog geen kaarten om een backup van te maken.", "Geen Kaarten", "ℹ️");
@@ -1110,22 +1090,6 @@
     function closeModalOnBgClick(e) {
       if (e.target === e.currentTarget) closeModal(e.currentTarget.id);
     }
-
-
-    // Voorkom enkel het naar beneden trekken aan de top op iOS (geen rubber-banding)
-    let touchStartY = 0;
-    document.addEventListener('touchstart', (e) => {
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-
-    document.addEventListener('touchmove', (e) => {
-      const touchY = e.touches[0].clientY;
-      const isPullingDown = touchY > touchStartY;
-      // Als de pagina al helemaal bovenaan staat en je trekt omlaag -> blokkeer
-      if (window.scrollY === 0 && isPullingDown) {
-        if (e.cancelable) e.preventDefault();
-      }
-    }, { passive: false });
 
     renderCards();
   </script>
