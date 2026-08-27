@@ -1116,19 +1116,22 @@
     }, { passive: false });
 
 
-    // Zorgt dat de kaarten op elk toestel exact onder de header beginnen
+    // Zorgt voor extra ademruimte op Android & iOS
     function syncHeaderPadding() {
       const header = document.getElementById('mainAppHeader');
       const main = document.getElementById('mainContainer');
       if (header && main) {
-        const headerHeight = header.offsetHeight;
-        main.style.paddingTop = `${headerHeight + 12}px`;
+        const headerHeight = header.getBoundingClientRect().height;
+        // 24px extra speling i.p.v. 12px voor safe-areas en schaduw
+        main.style.paddingTop = `${Math.ceil(headerHeight) + 24}px`;
       }
     }
 
-    // Direct uitvoeren bij laden en herberekenen bij rotatie/resizen
+    // Direct en vertraagd uitvoeren om safe-areas op mobiel op te vangen
     window.addEventListener('resize', syncHeaderPadding);
     window.addEventListener('DOMContentLoaded', syncHeaderPadding);
+    window.addEventListener('load', syncHeaderPadding);
+    setTimeout(syncHeaderPadding, 150);
 
     renderCards();
     syncHeaderPadding();
