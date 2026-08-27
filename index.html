@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl" class="h-full">
+<html lang="nl" class="h-full bg-[#0e2254]">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -28,16 +28,6 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
-    /* Vaste buitenste viewport: geen rubber banding aan de buitenkant */
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-      background-color: #0e2254;
-    }
-
     *, *::before, *::after {
       -webkit-touch-callout: none !important;
       -webkit-user-select: none !important;
@@ -59,18 +49,9 @@
     }
 
     .nav-box {
-      padding-bottom: max(0.75rem, var(--sab));
-      padding-left: max(1.5rem, var(--sal));
-      padding-right: max(1.5rem, var(--sar));
-    }
-
-    /* Scrollbare lijst met volledige iOS touch support */
-    #mainScrollArea {
-      flex: 1 1 0%;
-      overflow-y: scroll !important;
-      -webkit-overflow-scrolling: touch !important;
-      overscroll-behavior-y: contain;
-      touch-action: pan-y !important;
+      padding-bottom: max(0.6rem, var(--sab));
+      padding-left: max(1rem, var(--sal));
+      padding-right: max(1rem, var(--sar));
     }
 
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
@@ -93,10 +74,10 @@
     }
   </style>
 </head>
-<body class="text-slate-800 font-sans antialiased flex flex-col h-full bg-white select-none" oncontextmenu="return false;">
+<body class="bg-[#0e2254] text-slate-800 font-sans antialiased h-[100dvh] flex flex-col overflow-hidden select-none m-0 p-0" oncontextmenu="return false;">
 
   <!-- BOVENSTE VAK: Vaste Header -->
-  <header class="flex-shrink-0 navy-mesh-gradient text-white shadow-lg z-20 pb-4 header-box border-b border-indigo-300/30">
+  <header class="flex-none navy-mesh-gradient text-white shadow-lg z-20 pb-4 header-box border-b border-indigo-300/30">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
         <span>💳</span> Mijn Kaarten
@@ -118,22 +99,22 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Actieve Scroll Container -->
-  <main id="mainScrollArea" class="w-full bg-white">
-    <div class="p-4 max-w-lg mx-auto pb-36">
+  <!-- MIDDEN: Volledig Scrollbare Kaarten Container -->
+  <main class="flex-1 overflow-y-auto bg-white" style="-webkit-overflow-scrolling: touch;">
+    <div class="p-4 max-w-lg mx-auto pb-10">
       <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
     </div>
   </main>
 
-  <!-- ONDERSTE VAK: Vaste Dock Navigatie -->
-  <nav class="flex-shrink-0 fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-indigo-300/30 z-30 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(29,78,216,0.25)]">
+  <!-- ONDERSTE VAK: Dock Navigatie (Geen witruimte eronder) -->
+  <nav class="flex-none navy-mesh-gradient border-t border-indigo-300/30 z-20 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(29,78,216,0.25)]">
     <!-- Links: Alle Kaarten -->
     <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">🗂️</span>
       <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
 
-    <!-- Midden: Vaakst Gebruikt -->
+    <!-- Midden: Vaakst Gebruikt (Standaard Actief) -->
     <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]">
       <span class="text-xl leading-none">⭐</span>
       <span class="text-[11px] font-extrabold tracking-tight">Vaakst Gebruikt</span>
@@ -174,7 +155,7 @@
     </div>
   </div>
 
-  <!-- Modal: Toon Code -->
+  <!-- Modal: Toon Code (Groot formaat & WakeLock) -->
   <div id="viewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
     <div id="viewModalContent" class="bg-white text-slate-900 w-full max-w-md rounded-[2.5rem] p-6 sm:p-8 flex flex-col items-center gap-4 text-center shadow-2xl my-auto border border-slate-100">
       
