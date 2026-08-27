@@ -47,6 +47,11 @@
       overscroll-behavior-y: none;
     }
 
+    /* Zuivere CSS-berekening voor iOS Safe Areas + Header hoogte */
+    #mainContainer {
+      padding-top: calc(max(1rem, var(--sat)) + 8rem) !important;
+    }
+
     /* Enkele Vaste Header: blijft 100% gefixeerd tegen inertial bounce */
     header.fixed-app-header {
       position: fixed;
@@ -1121,9 +1126,11 @@
       const header = document.getElementById('mainAppHeader');
       const main = document.getElementById('mainContainer');
       if (header && main) {
+        // Enkel bijstellen als JavaScript een grotere hoogte meet dan de CSS-fallback
         const headerHeight = header.getBoundingClientRect().height;
-        // 24px extra speling i.p.v. 12px voor safe-areas en schaduw
-        main.style.paddingTop = `${Math.ceil(headerHeight) + 24}px`;
+        if (headerHeight > 0) {
+          main.style.paddingTop = `calc(${Math.ceil(headerHeight)}px + 1.25rem)`;
+        }
       }
     }
 
