@@ -1095,6 +1095,26 @@
       if (e.target === e.currentTarget) closeModal(e.currentTarget.id);
     }
 
+    // Kinetische rem op iOS
+    let lastY = 0;
+    window.addEventListener('touchstart', (e) => {
+      lastY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY = currentY - lastY;
+      
+      // Als je binnen 30px van de top bent en heel hard naar beneden veegt
+      if (window.scrollY <= 30 && deltaY > 15) {
+        if (e.cancelable) {
+          // Remt de versnelling af zonder het scrollen te blokkeren
+          window.scrollTo(0, 0);
+        }
+      }
+      lastY = currentY;
+    }, { passive: false });
+    
     renderCards();
   </script>
 </body>
