@@ -114,8 +114,8 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (Dynamische padding sluit exact aan) -->
-  <main id="mainContainer" class="p-4 max-w-lg w-full mx-auto flex-1 bg-white" style="padding-top: calc(max(0.9rem, env(safe-area-inset-top, 0px)) + 5.5rem);">
+  <!-- MIDDEN: Kaartenoverzicht (Padding wordt automatisch pixel-perfect ingesteld) -->
+  <main id="mainContainer" class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
@@ -1114,8 +1114,24 @@
       }
       lastY = currentY;
     }, { passive: false });
-    
+
+
+    // Zorgt dat de kaarten op elk toestel exact onder de header beginnen
+    function syncHeaderPadding() {
+      const header = document.getElementById('mainAppHeader');
+      const main = document.getElementById('mainContainer');
+      if (header && main) {
+        const headerHeight = header.offsetHeight;
+        main.style.paddingTop = `${headerHeight + 12}px`;
+      }
+    }
+
+    // Direct uitvoeren bij laden en herberekenen bij rotatie/resizen
+    window.addEventListener('resize', syncHeaderPadding);
+    window.addEventListener('DOMContentLoaded', syncHeaderPadding);
+
     renderCards();
+    syncHeaderPadding();
   </script>
 </body>
 </html>

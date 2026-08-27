@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kaarten-v2.5.9';
+const CACHE_NAME = 'kaarten-v2.5.10';
 const ASSETS = [
   './index.html',
   './manifest.json',
