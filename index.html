@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl" class="h-full">
+<html lang="nl" class="h-full bg-[#08142c]">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Mijn Kaarten</title>
   
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0e2254">
+  <meta name="theme-color" content="#08142c">
   <meta name="mobile-web-app-capable" content="yes">
   
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -28,14 +28,9 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
-    *, *::before, *::after {
-      -webkit-touch-callout: none !important;
-      -webkit-user-select: none !important;
-      user-select: none !important;
-    }
-
-    img {
-      pointer-events: none;
+    /* Rijke, iets donkerdere Marine / Navy Blue Mesh Gradient */
+    .navy-mesh-gradient {
+      background: linear-gradient(135deg, #08142c 0%, #0e2a66 45%, #1d4ed8 80%, #1e40af 100%);
     }
 
     body {
@@ -45,11 +40,7 @@
       padding-right: var(--sar);
       margin: 0;
       background-color: #ffffff;
-    }
-
-    /* Levendige Navy & Indigo Gradient */
-    .navy-mesh-gradient {
-      background: linear-gradient(135deg, #0e2254 0%, #1d4ed8 45%, #4338ca 80%, #6366f1 100%);
+      -webkit-overflow-scrolling: touch;
     }
 
     .header-box {
@@ -61,11 +52,7 @@
     }
 
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
-    input[type="text"] { 
-      font-size: 16px; 
-      -webkit-user-select: auto !important; 
-      user-select: auto !important; 
-    }
+    input[type="text"] { font-size: 16px; }
 
     #barcodeCanvas {
       width: 100% !important;
@@ -80,15 +67,15 @@
     }
   </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white" oncontextmenu="return false;">
+<body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white pb-32">
 
-  <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Gradient -->
-  <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-indigo-300/30">
+  <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Blue Gradient (vult de statusbalk perfect op) -->
+  <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-blue-400/20">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
         <span>💳</span> Mijn Kaarten
       </h1>
-      <button onclick="openAddModal()" class="bg-white/20 hover:bg-white/30 active:scale-95 text-white px-4 py-2 rounded-2xl text-xs font-extrabold transition shadow-md border border-white/30 backdrop-blur-sm">
+      <button onclick="openAddModal()" class="bg-white/15 hover:bg-white/25 active:scale-95 text-white px-4 py-2 rounded-2xl text-xs font-extrabold transition shadow-md border border-white/25 backdrop-blur-sm">
         + Nieuw
       </button>
     </div>
@@ -96,24 +83,24 @@
     <!-- Zoekbalk & Sorteerknop -->
     <div class="flex gap-2">
       <div class="relative flex-1">
-        <span class="absolute inset-y-0 left-3 flex items-center text-indigo-200 pointer-events-none text-sm">🔍</span>
-        <input id="searchInput" oninput="renderCards()" type="text" placeholder="Zoek kaart..." class="w-full bg-black/20 backdrop-blur-md border border-white/25 rounded-2xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-white focus:ring-2 focus:ring-white/30 text-white placeholder-indigo-100/70 transition shadow-inner">
+        <span class="absolute inset-y-0 left-3 flex items-center text-blue-200 pointer-events-none text-sm">🔍</span>
+        <input id="searchInput" oninput="renderCards()" type="text" placeholder="Zoek kaart..." class="w-full bg-black/25 backdrop-blur-md border border-white/20 rounded-2xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-white focus:ring-2 focus:ring-white/30 text-white placeholder-blue-100/60 transition shadow-inner">
       </div>
-      <button onclick="toggleSort()" id="sortBtn" class="bg-black/20 backdrop-blur-md border border-white/25 px-3.5 py-2 rounded-2xl text-xs font-bold text-white hover:bg-white/10 transition flex items-center gap-1.5 shadow-inner">
+      <button onclick="toggleSort()" id="sortBtn" class="bg-black/25 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-2xl text-xs font-bold text-white hover:bg-white/10 transition flex items-center gap-1.5 shadow-inner">
         <span>🔤</span> <span id="sortLabel">A-Z</span>
       </button>
     </div>
   </header>
 
-  <!-- MIDDEN: Wit Kaartenoverzicht -->
-  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white pb-32">
+  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (Scrollt natuurlijk en vloeiend mee) -->
+  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
-  <!-- ONDERSTE VAK: Vloeiende Dock met afgeronde top -->
-  <nav class="fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-indigo-300/30 z-30 px-6 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(29,78,216,0.25)]">
+  <!-- ONDERSTE VAK: Vloeiende Dock met afgeronde top in Navy Blue -->
+  <nav class="fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-blue-400/20 z-30 px-6 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(8,20,44,0.35)]">
     <!-- Links: Alle Kaarten -->
-    <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95">
+    <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">🗂️</span>
       <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
@@ -125,14 +112,14 @@
     </button>
 
     <!-- Rechts: Beheer -->
-    <button onclick="openManageModal()" id="tabManageBtn" class="flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95">
+    <button onclick="openManageModal()" id="tabManageBtn" class="flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">⚙️</span>
       <span class="text-[11px] font-semibold tracking-tight">Beheer</span>
     </button>
   </nav>
 
   <!-- Modal: Beheer -->
-  <div id="manageModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50" onclick="closeModalOnBgClick(event)">
+  <div id="manageModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50" onclick="closeModalOnBgClick(event)">
     <div class="bg-white border border-slate-200 w-full max-w-xs rounded-3xl p-6 flex flex-col gap-4 text-slate-900 shadow-2xl my-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <h3 class="text-base font-extrabold flex items-center gap-2 text-slate-900"><span>⚙️</span> Beheer & Backup</h3>
@@ -140,27 +127,27 @@
       </div>
 
       <div class="flex flex-col gap-2.5">
-        <button onclick="exportBackup()" class="w-full navy-mesh-gradient text-white border border-indigo-300/30 py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-between transition active:scale-95 shadow-md shadow-indigo-500/20">
+        <button onclick="exportBackup()" class="w-full navy-mesh-gradient text-white border border-blue-400/20 py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-between transition active:scale-95 shadow-md shadow-blue-950/20">
           <span class="flex items-center gap-2.5"><span>💾</span> Backup naar Cloud</span>
-          <span class="text-indigo-100 font-extrabold">→</span>
+          <span class="text-blue-200 font-extrabold">→</span>
         </button>
 
-        <button onclick="document.getElementById('importFileInput').click()" class="w-full navy-mesh-gradient text-white border border-indigo-300/30 py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-between transition active:scale-95 shadow-md shadow-indigo-500/20">
+        <button onclick="document.getElementById('importFileInput').click()" class="w-full navy-mesh-gradient text-white border border-blue-400/20 py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-between transition active:scale-95 shadow-md shadow-blue-950/20">
           <span class="flex items-center gap-2.5"><span>📥</span> Herstel Opgeslagen Backup</span>
-          <span class="text-indigo-100 font-extrabold">→</span>
+          <span class="text-blue-200 font-extrabold">→</span>
         </button>
         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importBackup(this)">
 
-        <button onclick="checkForAppUpdate()" class="w-full navy-mesh-gradient text-white border border-indigo-300/30 py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-between transition active:scale-95 shadow-md shadow-indigo-500/20">
+        <button onclick="checkForAppUpdate()" class="w-full navy-mesh-gradient text-white border border-blue-400/20 py-3.5 px-4 rounded-2xl text-xs font-bold flex items-center justify-between transition active:scale-95 shadow-md shadow-blue-950/20">
           <span class="flex items-center gap-2.5"><span id="updateIcon">🔄</span> Zoek naar Updates</span>
-          <span class="text-indigo-100 font-extrabold">→</span>
+          <span class="text-blue-200 font-extrabold">→</span>
         </button>
       </div>
     </div>
   </div>
 
   <!-- Modal: Toon Code (Groot formaat & Helderheid) -->
-  <div id="viewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
+  <div id="viewModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
     <div id="viewModalContent" class="bg-white text-slate-900 w-full max-w-md rounded-[2.5rem] p-6 sm:p-8 flex flex-col items-center gap-4 text-center shadow-2xl my-auto border border-slate-100">
       
       <div class="w-full flex justify-between items-center border-b border-slate-100 pb-3">
@@ -185,7 +172,7 @@
           <button onclick="editCurrentCard()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3.5 rounded-2xl font-bold text-sm transition active:scale-95 flex items-center justify-center gap-1.5 border border-slate-200">
             <span>✏️</span> Bewerken
           </button>
-          <button onclick="closeModal('viewModal')" class="flex-1 navy-mesh-gradient text-white py-3.5 rounded-2xl font-bold text-sm transition active:scale-95 shadow-md border border-indigo-300/30">
+          <button onclick="closeModal('viewModal')" class="flex-1 navy-mesh-gradient text-white py-3.5 rounded-2xl font-bold text-sm transition active:scale-95 shadow-md border border-blue-400/20">
             Klaar
           </button>
         </div>
@@ -197,7 +184,7 @@
   </div>
 
   <!-- Modal: Kaart Toevoegen / Bewerken Wizard -->
-  <div id="addModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden z-40 overflow-y-auto" onclick="closeModalOnBgClick(event)">
+  <div id="addModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden z-40 overflow-y-auto" onclick="closeModalOnBgClick(event)">
     <div class="bg-white border border-slate-200 w-full max-w-md rounded-[2.5rem] p-6 flex flex-col gap-4 text-slate-900 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
       
       <div class="flex justify-between items-center pb-2 border-b border-slate-100">
@@ -216,7 +203,7 @@
 
       <!-- STAP 1 -->
       <div id="wizardStep1" class="flex flex-col gap-4">
-        <div id="scanner-container" class="hidden overflow-hidden rounded-2xl bg-black border-2 border-blue-600 relative">
+        <div id="scanner-container" class="hidden overflow-hidden rounded-2xl bg-black border-2 border-blue-700 relative">
           <div id="reader" style="width: 100%; min-height: 180px;"></div>
         </div>
         
@@ -233,18 +220,18 @@
         <div class="flex flex-col gap-3">
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Winkelnaam</label>
-            <input id="cardName" type="text" placeholder="bv. Colruyt, Delhaize, Decathlon" class="w-full bg-slate-100 border border-slate-200 rounded-2xl p-3 mt-1 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-500/20 text-slate-900 transition">
+            <input id="cardName" type="text" placeholder="bv. Colruyt, Delhaize, Decathlon" class="w-full bg-slate-100 border border-slate-200 rounded-2xl p-3 mt-1 focus:outline-none focus:border-blue-700 focus:bg-white focus:ring-2 focus:ring-blue-700/20 text-slate-900 transition">
           </div>
 
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Code / Barcode</label>
-            <input id="cardNumber" type="text" placeholder="Scan of typ code" class="w-full bg-slate-100 border border-slate-200 rounded-2xl p-3 mt-1 font-mono text-sm focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-500/20 text-slate-900 transition">
+            <input id="cardNumber" type="text" placeholder="Scan of typ code" class="w-full bg-slate-100 border border-slate-200 rounded-2xl p-3 mt-1 font-mono text-sm focus:outline-none focus:border-blue-700 focus:bg-white focus:ring-2 focus:ring-blue-700/20 text-slate-900 transition">
           </div>
 
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Formaat</label>
             <div class="grid grid-cols-2 gap-2 mt-1">
-              <button type="button" id="typeBarcodeBtn" onclick="setType('BARCODE')" class="py-2.5 rounded-xl text-xs font-extrabold navy-mesh-gradient text-white border border-indigo-300/30 transition shadow-sm">Streepjescode</button>
+              <button type="button" id="typeBarcodeBtn" onclick="setType('BARCODE')" class="py-2.5 rounded-xl text-xs font-extrabold navy-mesh-gradient text-white border border-blue-400/20 transition shadow-sm">Streepjescode</button>
               <button type="button" id="typeQrBtn" onclick="setType('QR_CODE')" class="py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-100 text-slate-600 transition">QR-Code</button>
             </div>
           </div>
@@ -252,7 +239,7 @@
 
         <div class="flex gap-2.5 pt-2">
           <button onclick="closeModal('addModal')" class="flex-1 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl text-sm font-bold transition active:scale-95 text-slate-700">Annuleren</button>
-          <button onclick="goToStep2()" class="flex-1 navy-mesh-gradient text-white py-3.5 rounded-2xl text-sm font-bold transition shadow-md border border-indigo-300/30 active:scale-95">Volgende: Icoon →</button>
+          <button onclick="goToStep2()" class="flex-1 navy-mesh-gradient text-white py-3.5 rounded-2xl text-sm font-bold transition shadow-md border border-blue-400/20 active:scale-95">Volgende: Icoon →</button>
         </div>
       </div>
 
@@ -260,7 +247,7 @@
       <div id="wizardStep2" class="hidden flex flex-col gap-4">
         <div class="flex flex-col items-center justify-center p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
           <span class="text-[11px] font-bold text-slate-400 uppercase mb-2">Voorbeeld Tegel</span>
-          <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-sm bg-blue-700 text-white overflow-hidden p-1">
+          <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-sm bg-blue-800 text-white overflow-hidden p-1">
             <span id="previewInitials">CO</span>
           </div>
           <span id="previewName" class="text-sm font-bold text-slate-900 mt-2 truncate max-w-[150px]">Colruyt</span>
@@ -269,7 +256,7 @@
         <div class="flex flex-col gap-2">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Online Logo Zoeken</label>
           <div class="flex gap-2">
-            <input id="logoSearchQuery" type="text" placeholder="bv. Colruyt logo" class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900">
+            <input id="logoSearchQuery" type="text" placeholder="bv. Colruyt logo" class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
             <button onclick="searchWebLogos()" type="button" class="bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3.5 py-2 rounded-2xl text-xs font-bold text-slate-800">Zoek</button>
           </div>
           <div id="onlineLogoResults" class="flex gap-2 overflow-x-auto py-1 min-h-[50px] items-center">
@@ -288,29 +275,29 @@
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">3. Of kies Kleur & Initialen</label>
           <div id="colorSwatches" class="flex gap-2 overflow-x-auto py-1.5 px-0.5">
-            <button type="button" onclick="selectColorTile('#1d4ed8', this)" class="color-btn w-8 h-8 rounded-full bg-blue-700 flex-shrink-0 border-2 border-white ring-2 ring-blue-700 shadow-sm"></button>
-            <button type="button" onclick="selectColorTile('#0e2254', this)" class="color-btn w-8 h-8 rounded-full bg-slate-900 flex-shrink-0 border border-slate-300"></button>
+            <button type="button" onclick="selectColorTile('#1e3a8a', this)" class="color-btn w-8 h-8 rounded-full bg-blue-900 flex-shrink-0 border-2 border-white ring-2 ring-blue-900 shadow-sm"></button>
+            <button type="button" onclick="selectColorTile('#0a1931', this)" class="color-btn w-8 h-8 rounded-full bg-slate-950 flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#0f766e', this)" class="color-btn w-8 h-8 rounded-full bg-teal-700 flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#15803d', this)" class="color-btn w-8 h-8 rounded-full bg-green-700 flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#b91c1c', this)" class="color-btn w-8 h-8 rounded-full bg-red-700 flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#c2410c', this)" class="color-btn w-8 h-8 rounded-full bg-orange-700 flex-shrink-0 border border-slate-300"></button>
-            <button type="button" onclick="selectColorTile('#6d28d9', this)" class="color-btn w-8 h-8 rounded-full bg-purple-700 flex-shrink-0 border border-slate-300"></button>
+            <button type="button" onclick="selectColorTile('#581c87', this)" class="color-btn w-8 h-8 rounded-full bg-purple-900 flex-shrink-0 border border-slate-300"></button>
             <button type="button" onclick="selectColorTile('#1e293b', this)" class="color-btn w-8 h-8 rounded-full bg-slate-800 flex-shrink-0 border border-slate-300"></button>
           </div>
         </div>
 
         <div class="flex gap-2.5 pt-3 border-t border-slate-100">
           <button onclick="goToStep1()" class="flex-1 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl text-sm font-bold transition text-slate-700">← Terug</button>
-          <button onclick="saveFinalCard()" class="flex-1 navy-mesh-gradient text-white py-3.5 rounded-2xl text-sm font-bold transition shadow-md border border-indigo-300/30">Opslaan</button>
+          <button onclick="saveFinalCard()" class="flex-1 navy-mesh-gradient text-white py-3.5 rounded-2xl text-sm font-bold transition shadow-md border border-blue-400/20">Opslaan</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Universele Dialog Modal -->
-  <div id="dialogModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+  <div id="dialogModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
     <div class="bg-white border border-slate-200 w-full max-w-xs rounded-3xl p-6 flex flex-col items-center gap-4 text-center shadow-2xl animate-fade-in">
-      <div id="dialogIcon" class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center text-2xl">
+      <div id="dialogIcon" class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-900 flex items-center justify-center text-2xl">
         ℹ️
       </div>
       <div class="flex flex-col gap-1.5">
@@ -321,7 +308,7 @@
         <button id="dialogCancelBtn" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-bold transition active:scale-95 hidden">
           Annuleren
         </button>
-        <button id="dialogConfirmBtn" class="flex-1 navy-mesh-gradient text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 border border-indigo-300/30">
+        <button id="dialogConfirmBtn" class="flex-1 navy-mesh-gradient text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 border border-blue-400/20">
           Begrepen
         </button>
       </div>
@@ -329,7 +316,6 @@
   </div>
 
   <script>
-    // 1. Service Worker registratie met expliciete bypass van de HTTP-cache
     let swRegistration = null;
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
@@ -348,7 +334,6 @@
       });
     }
 
-    // 2. Globale variabelen
     let cards = JSON.parse(localStorage.getItem('cards') || '[]');
     let html5QrCode = null;
     let currentSelectedType = 'BARCODE';
@@ -366,10 +351,9 @@
       code: '',
       type: 'BARCODE',
       iconType: 'COLOR',
-      iconData: '#1d4ed8'
+      iconData: '#1e3a8a'
     };
 
-    // 3. Screen Wake Lock
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -385,7 +369,6 @@
       }
     }
 
-    // 4. Universele Custom Popups
     function showAppDialog({ title = 'Melding', message = '', icon = 'ℹ️', confirmText = 'Begrepen', confirmColor = 'navy-mesh-gradient', showCancel = false, cancelText = 'Annuleren' }) {
       return new Promise((resolve) => {
         const modal = document.getElementById('dialogModal');
@@ -396,7 +379,7 @@
         const cancelBtn = document.getElementById('dialogCancelBtn');
 
         confirmBtn.innerText = confirmText;
-        confirmBtn.className = `flex-1 ${confirmColor} text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 border border-indigo-300/30`;
+        confirmBtn.className = `flex-1 ${confirmColor} text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 border border-blue-400/20`;
 
         if (showCancel) {
           cancelBtn.innerText = cancelText;
@@ -422,7 +405,6 @@
 
     window.alert = function(msg) { showAppAlert(msg); };
 
-    // 5. Tabblad Management
     function switchTab(tab) {
       currentTab = tab;
       const allBtn = document.getElementById('tabAllBtn');
@@ -431,12 +413,12 @@
       if (tab === 'favorites') {
         favBtn.className = 'flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]';
         favBtn.querySelector('span:last-child').className = 'text-[11px] font-extrabold tracking-tight';
-        allBtn.className = 'flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95';
+        allBtn.className = 'flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95';
         allBtn.querySelector('span:last-child').className = 'text-[11px] font-semibold tracking-tight';
       } else {
         allBtn.className = 'flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]';
         allBtn.querySelector('span:last-child').className = 'text-[11px] font-extrabold tracking-tight';
-        favBtn.className = 'flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95';
+        favBtn.className = 'flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95';
         favBtn.querySelector('span:last-child').className = 'text-[11px] font-semibold tracking-tight';
       }
       renderCards();
@@ -459,7 +441,6 @@
       return name.slice(0, 2).toUpperCase();
     }
 
-    // 6. Render Kaarten
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -494,24 +475,23 @@
 
         let tileInner = '';
         if (card.iconType === 'IMAGE' && card.iconData) {
-          tileInner = `<img src="${card.iconData}" class="w-full h-full object-contain p-2.5 bg-white" onerror="this.parentElement.style.backgroundColor='#1d4ed8'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
+          tileInner = `<img src="${card.iconData}" class="w-full h-full object-contain p-2.5 bg-white" onerror="this.parentElement.style.backgroundColor='#1e3a8a'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
         } else {
           tileInner = `<span class="font-bold text-2xl text-white drop-shadow">${getInitials(card.name)}</span>`;
         }
 
         item.innerHTML = `
-          <div class="w-full aspect-square bg-white border border-slate-200/90 group-hover:border-blue-500 rounded-3xl flex items-center justify-center overflow-hidden shadow-sm hover:shadow-md transition" style="${card.iconType !== 'IMAGE' ? `background-color: ${card.iconData || '#1d4ed8'}` : ''}">
+          <div class="w-full aspect-square bg-white border border-slate-200/90 group-hover:border-blue-700 rounded-3xl flex items-center justify-center overflow-hidden shadow-sm hover:shadow-md transition" style="${card.iconType !== 'IMAGE' ? `background-color: ${card.iconData || '#1e3a8a'}` : ''}">
             ${tileInner}
           </div>
           <div class="w-full mt-2 text-center">
-            <h3 class="font-bold text-sm text-slate-800 group-hover:text-blue-700 truncate px-1">${card.name}</h3>
+            <h3 class="font-bold text-sm text-slate-800 group-hover:text-blue-900 truncate px-1">${card.name}</h3>
           </div>
         `;
         container.appendChild(item);
       });
     }
 
-    // 7. Kaart Weergeven
     function showCard(index) {
       activeViewingIndex = index;
       const card = cards[index];
@@ -527,7 +507,7 @@
         logoWrapper.style.backgroundColor = '#ffffff';
         logoWrapper.innerHTML = `<img src="${card.iconData}" class="w-full h-full object-contain bg-white p-0.5">`;
       } else {
-        logoWrapper.style.backgroundColor = card.iconData || '#1d4ed8';
+        logoWrapper.style.backgroundColor = card.iconData || '#1e3a8a';
         logoWrapper.innerHTML = `<span class="text-xs font-bold text-white">${getInitials(card.name)}</span>`;
       }
 
@@ -618,14 +598,13 @@
         code: card.code,
         type: card.type || 'BARCODE',
         iconType: card.iconType || 'COLOR',
-        iconData: card.iconData || '#1d4ed8'
+        iconData: card.iconData || '#1e3a8a'
       };
 
       goToStep1();
       document.getElementById('addModal').classList.remove('hidden');
     }
 
-    // 8. Wizard Stappen
     function openAddModal() {
       editingIndex = null;
       document.getElementById('cardName').value = '';
@@ -678,7 +657,7 @@
       tempCardData.type = currentSelectedType;
       if (!tempCardData.iconData) {
         tempCardData.iconType = 'COLOR';
-        tempCardData.iconData = '#1d4ed8';
+        tempCardData.iconData = '#1e3a8a';
       }
 
       document.getElementById('wizardTitle').innerText = 'Stap 2: Kies Icoon of Kleur';
@@ -696,7 +675,7 @@
         preview.style.backgroundColor = '#ffffff';
         preview.innerHTML = `<img src="${tempCardData.iconData}" class="w-full h-full object-contain p-1">`;
       } else {
-        preview.style.backgroundColor = tempCardData.iconData || '#1d4ed8';
+        preview.style.backgroundColor = tempCardData.iconData || '#1e3a8a';
         preview.innerHTML = `<span id="previewInitials">${getInitials(tempCardData.name)}</span>`;
       }
     }
@@ -706,11 +685,11 @@
       tempCardData.iconData = hex;
 
       document.querySelectorAll('#colorSwatches .color-btn').forEach(btn => {
-        btn.className = btn.className.replace(/border-2 border-white ring-2 ring-blue-700/g, 'border border-slate-300');
+        btn.className = btn.className.replace(/border-2 border-white ring-2 ring-blue-900/g, 'border border-slate-300');
       });
 
       if (clickedBtn) {
-        clickedBtn.className = clickedBtn.className.replace('border border-slate-300', 'border-2 border-white ring-2 ring-blue-700');
+        clickedBtn.className = clickedBtn.className.replace('border border-slate-300', 'border-2 border-white ring-2 ring-blue-900');
       }
 
       updateTilePreview();
@@ -734,7 +713,7 @@
       urls.forEach((url) => {
         const imgBtn = document.createElement('button');
         imgBtn.type = 'button';
-        imgBtn.className = 'w-12 h-12 bg-white rounded-xl p-1 border-2 border-slate-200 flex-shrink-0 flex items-center justify-center hover:border-blue-600 transition overflow-hidden shadow-sm';
+        imgBtn.className = 'w-12 h-12 bg-white rounded-xl p-1 border-2 border-slate-200 flex-shrink-0 flex items-center justify-center hover:border-blue-700 transition overflow-hidden shadow-sm';
         imgBtn.innerHTML = `<img src="${url}" class="max-w-full max-h-full object-contain" onerror="this.parentElement.remove()">`;
         imgBtn.onclick = () => {
           tempCardData.iconType = 'IMAGE';
@@ -900,7 +879,7 @@
       const bBtn = document.getElementById('typeBarcodeBtn');
       const qBtn = document.getElementById('typeQrBtn');
       
-      const activeClass = "py-2.5 rounded-xl text-xs font-extrabold navy-mesh-gradient text-white border border-indigo-300/30 transition shadow-sm";
+      const activeClass = "py-2.5 rounded-xl text-xs font-extrabold navy-mesh-gradient text-white border border-blue-400/20 transition shadow-sm";
       const inactiveClass = "py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-100 text-slate-600 transition";
 
       if (type === 'QR_CODE') {
@@ -1024,7 +1003,6 @@
       if (e.target === e.currentTarget) closeModal(e.currentTarget.id);
     }
 
-    // Start direct
     renderCards();
   </script>
 </body>
