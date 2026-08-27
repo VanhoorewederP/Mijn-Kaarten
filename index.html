@@ -28,7 +28,6 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
-    /* Rijke Marine / Navy Blue Mesh Gradient */
     .navy-mesh-gradient {
       background: linear-gradient(135deg, #08142c 0%, #0e2a66 45%, #1d4ed8 80%, #1e40af 100%);
     }
@@ -51,6 +50,12 @@
       padding-bottom: max(0.75rem, var(--sab));
     }
 
+    /* Verbeterde beeldscherpte voor logo's */
+    .crisp-logo {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
     input[type="text"] { font-size: 16px; }
 
@@ -66,19 +71,13 @@
       height: 240px !important;
     }
 
-    /* Vaste scrollbalk verbergen voor strakke app-look */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white pb-32">
 
-  <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Blue Gradient -->
+  <!-- Header -->
   <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-blue-400/20">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
@@ -101,26 +100,23 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (1:1 Vaste Vierkanten) -->
+  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht -->
   <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
-  <!-- ONDERSTE VAK: Vloeiende Dock met afgeronde top in Navy Blue -->
+  <!-- ONDERSTE VAK: Vloeiende Dock Navigatie -->
   <nav class="fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-blue-400/20 z-30 px-6 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(8,20,44,0.35)]">
-    <!-- Links: Alle Kaarten -->
     <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">🗂️</span>
       <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
 
-    <!-- Midden: Vaakst Gebruikt (Standaard Actief) -->
     <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]">
       <span class="text-xl leading-none">⭐</span>
       <span class="text-[11px] font-extrabold tracking-tight">Vaakst Gebruikt</span>
     </button>
 
-    <!-- Rechts: Beheer -->
     <button onclick="openManageModal()" id="tabManageBtn" class="flex flex-col items-center justify-center gap-1 text-blue-200/70 hover:text-white py-1 transition active:scale-95">
       <span class="text-xl leading-none">⚙️</span>
       <span class="text-[11px] font-semibold tracking-tight">Beheer</span>
@@ -155,13 +151,12 @@
     </div>
   </div>
 
-  <!-- Modal: Toon Code (Groot formaat & Helderheid) -->
+  <!-- Modal: Toon Code -->
   <div id="viewModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
     <div id="viewModalContent" class="bg-white text-slate-900 w-full max-w-md rounded-[2.5rem] p-6 sm:p-8 flex flex-col items-center gap-4 text-center shadow-2xl my-auto border border-slate-100">
-      
       <div class="w-full flex justify-between items-center border-b border-slate-100 pb-3">
         <div class="flex items-center gap-3 truncate">
-          <div id="viewLogoWrapper" class="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm"></div>
+          <div id="viewLogoWrapper" class="w-11 h-11 rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm border border-slate-100"></div>
           <h2 id="viewTitle" class="text-xl font-extrabold truncate text-slate-900 text-left tracking-tight"></h2>
         </div>
         <button onclick="closeModal('viewModal')" class="text-slate-400 hover:text-slate-700 text-2xl font-bold px-2 py-1">✕</button>
@@ -192,7 +187,7 @@
     </div>
   </div>
 
-  <!-- Modal: Kaart Toevoegen / Bewerken Wizard -->
+  <!-- Modal: Wizard -->
   <div id="addModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden z-40 overflow-y-auto" onclick="closeModalOnBgClick(event)">
     <div class="bg-white border border-slate-200 w-full max-w-md rounded-[2.5rem] p-6 flex flex-col gap-4 text-slate-900 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
       
@@ -229,7 +224,7 @@
         <div class="flex flex-col gap-3">
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Winkelnaam</label>
-            <input id="cardName" type="text" placeholder="bv. Colruyt, Delhaize, Decathlon" class="w-full bg-slate-100 border border-slate-200 rounded-2xl p-3 mt-1 focus:outline-none focus:border-blue-700 focus:bg-white focus:ring-2 focus:ring-blue-700/20 text-slate-900 transition">
+            <input id="cardName" type="text" placeholder="bv. Colruyt, Keurslager, Apotheek" class="w-full bg-slate-100 border border-slate-200 rounded-2xl p-3 mt-1 focus:outline-none focus:border-blue-700 focus:bg-white focus:ring-2 focus:ring-blue-700/20 text-slate-900 transition">
           </div>
 
           <div>
@@ -252,47 +247,48 @@
         </div>
       </div>
 
-      <!-- STAP 2: 4 UITGEBREIDE ICOON METHODES -->
+      <!-- STAP 2 -->
       <div id="wizardStep2" class="hidden flex flex-col gap-4">
         
-        <!-- Live Preview Tegel -->
+        <!-- Live Preview -->
         <div class="flex flex-col items-center justify-center p-3.5 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner">
           <span class="text-[11px] font-bold text-slate-400 uppercase mb-2">Live Voorbeeld</span>
-          <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-md bg-blue-900 text-white overflow-hidden p-0 border border-slate-200/80">
+          <div id="previewTile" class="w-20 h-20 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-md bg-white text-slate-900 overflow-hidden p-2 border border-slate-200">
             <span id="previewInitials">CO</span>
           </div>
           <span id="previewName" class="text-sm font-extrabold text-slate-900 mt-2 truncate max-w-[150px]">Colruyt</span>
         </div>
 
-        <!-- 1. Online HD Zoekmachine (Google Images + HD resolvers) -->
+        <!-- 1. HD Zoeken -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Zoek HD Logo (Alles online)</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Zoek HD Logo (Merken, Slagers, Apotheken...)</label>
           <div class="flex gap-2">
-            <input id="logoSearchQuery" type="text" placeholder="Winkel of merk..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
+            <input id="logoSearchQuery" type="text" placeholder="bv. Keurslager, Denaeyer, Colruyt..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
             <button onclick="searchWebLogos()" type="button" class="navy-mesh-gradient text-white px-4 py-2 rounded-2xl text-xs font-bold shadow-sm">Zoek</button>
           </div>
-          <div id="onlineLogoResults" class="flex gap-2 overflow-x-auto py-1.5 min-h-[60px] items-center no-scrollbar">
-            <span class="text-xs text-slate-400">Klik op 'Zoek' voor suggesties...</span>
+          <div id="onlineLogoResults" class="flex gap-2.5 overflow-x-auto py-2 min-h-[64px] items-center no-scrollbar">
+            <span class="text-xs text-slate-400">Typ de naam en klik op 'Zoek'...</span>
           </div>
         </div>
 
-        <!-- 2. Foto met automatische 1:1 Center-Square Crop -->
+        <!-- 2. Foto Vierkant -->
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart (Vierkant)</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart (Auto-Crop)</label>
           <button onclick="document.getElementById('cardPhotoInput').click()" type="button" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 py-2.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 text-slate-800 shadow-sm">
             📸 Neem Foto van Kaart
           </button>
           <input type="file" id="cardPhotoInput" accept="image/*" capture="environment" class="hidden" onchange="handleCardPhotoUpload(this)">
         </div>
 
-        <!-- 3. Categorie Pictogrammen met Eigen Achtergrondkleur -->
+        <!-- 3. Categorie Pictogrammen -->
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">3. Categorie Pictogram (Bib, Apotheek...)</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">3. Categorie Pictogram</label>
           <div class="flex gap-2 overflow-x-auto py-1 no-scrollbar text-lg">
             <button type="button" onclick="selectCategoryIcon('💊')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">💊</button>
             <button type="button" onclick="selectCategoryIcon('📚')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">📚</button>
             <button type="button" onclick="selectCategoryIcon('🥐')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🥐</button>
             <button type="button" onclick="selectCategoryIcon('🥩')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🥩</button>
+            <button type="button" onclick="selectCategoryIcon('🍫')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🍫</button>
             <button type="button" onclick="selectCategoryIcon('☕')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">☕</button>
             <button type="button" onclick="selectCategoryIcon('⛽')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">⛽</button>
             <button type="button" onclick="selectCategoryIcon('🛒')" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-200">🛒</button>
@@ -304,7 +300,7 @@
           </div>
         </div>
 
-        <!-- 4. Kleurenpalet (Voor Initialen of Pictogram Achtergrond) -->
+        <!-- 4. Kleurenpalet -->
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
           <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">4. Achtergrondkleur & Initialen</label>
           <div id="colorSwatches" class="flex gap-2 overflow-x-auto py-1.5 px-0.5 no-scrollbar">
@@ -383,7 +379,7 @@
       name: '',
       code: '',
       type: 'BARCODE',
-      iconType: 'COLOR', // 'IMAGE', 'ICON', 'COLOR'
+      iconType: 'COLOR',
       iconData: '#1e3a8a',
       iconSymbol: ''
     };
@@ -475,7 +471,7 @@
       return name.slice(0, 2).toUpperCase();
     }
 
-    // --- Render Kaarten (Geforceerd 1:1 Vierkant) ---
+    // --- Render Kaarten: Altijd 1:1 Vierkant & Scherpe weergave ---
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -512,7 +508,8 @@
         let bgStyle = '';
 
         if (card.iconType === 'IMAGE' && card.iconData) {
-          tileInner = `<img src="${card.iconData}" class="w-full h-full object-cover" onerror="this.parentElement.style.backgroundColor='#1e3a8a'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
+          bgStyle = 'background-color: #ffffff;';
+          tileInner = `<img src="${card.iconData}" class="w-full h-full object-contain p-2 crisp-logo" onerror="this.parentElement.style.backgroundColor='#1e3a8a'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
         } else if (card.iconType === 'ICON' && card.iconSymbol) {
           bgStyle = `background-color: ${card.iconData || '#1e3a8a'};`;
           tileInner = `<span class="text-4xl drop-shadow">${card.iconSymbol}</span>`;
@@ -522,7 +519,7 @@
         }
 
         item.innerHTML = `
-          <div class="w-full aspect-square bg-white border border-slate-200/90 group-hover:border-blue-700 rounded-3xl flex items-center justify-center overflow-hidden shadow-sm hover:shadow-md transition" style="${bgStyle}">
+          <div class="w-full aspect-square border border-slate-200/90 group-hover:border-blue-700 rounded-3xl flex items-center justify-center overflow-hidden shadow-sm hover:shadow-md transition" style="${bgStyle}">
             ${tileInner}
           </div>
           <div class="w-full mt-2 text-center">
@@ -533,7 +530,6 @@
       });
     }
 
-    // --- Show Card ---
     function showCard(index) {
       activeViewingIndex = index;
       const card = cards[index];
@@ -546,8 +542,8 @@
       
       const logoWrapper = document.getElementById('viewLogoWrapper');
       if (card.iconType === 'IMAGE' && card.iconData) {
-        logoWrapper.style.backgroundColor = 'transparent';
-        logoWrapper.innerHTML = `<img src="${card.iconData}" class="w-full h-full object-cover">`;
+        logoWrapper.style.backgroundColor = '#ffffff';
+        logoWrapper.innerHTML = `<img src="${card.iconData}" class="w-full h-full object-contain p-1 crisp-logo">`;
       } else if (card.iconType === 'ICON' && card.iconSymbol) {
         logoWrapper.style.backgroundColor = card.iconData || '#1e3a8a';
         logoWrapper.innerHTML = `<span class="text-lg">${card.iconSymbol}</span>`;
@@ -718,8 +714,8 @@
     function updateTilePreview() {
       const preview = document.getElementById('previewTile');
       if (tempCardData.iconType === 'IMAGE' && tempCardData.iconData) {
-        preview.style.backgroundColor = 'transparent';
-        preview.innerHTML = `<img src="${tempCardData.iconData}" class="w-full h-full object-cover">`;
+        preview.style.backgroundColor = '#ffffff';
+        preview.innerHTML = `<img src="${tempCardData.iconData}" class="w-full h-full object-contain p-1.5 crisp-logo">`;
       } else if (tempCardData.iconType === 'ICON' && tempCardData.iconSymbol) {
         preview.style.backgroundColor = tempCardData.iconData || '#1e3a8a';
         preview.innerHTML = `<span class="text-4xl drop-shadow">${tempCardData.iconSymbol}</span>`;
@@ -753,32 +749,45 @@
       updateTilePreview();
     }
 
-    // --- HD Multi-Source Logo Search (Google Images API + HD Resolvers) ---
+    // --- Ultra-HQ Multi-Engine Web Zoeker (Direct HD Bronnen & Brand Resolvers) ---
     async function searchWebLogos() {
       const query = document.getElementById('logoSearchQuery').value.trim() || tempCardData.name;
       const resultsContainer = document.getElementById('onlineLogoResults');
-      resultsContainer.innerHTML = '<span class="text-xs text-slate-400 animate-pulse">HD Logo\'s zoeken over het hele web...</span>';
+      resultsContainer.innerHTML = '<span class="text-xs text-blue-600 font-semibold animate-pulse">Haarscherpe logo\'s laden...</span>';
 
       const clean = query.toLowerCase().replace(/[^a-z0-9]/g, '');
       const candidates = new Set();
 
-      // 1. Directe HD Providers
+      // 1. Directe HD SVG/PNG Vector APIs
       candidates.add(`https://logo.clearbit.com/${clean}.be?size=512`);
       candidates.add(`https://logo.clearbit.com/${clean}.com?size=512`);
       candidates.add(`https://logo.clearbit.com/${clean}.nl?size=512`);
       candidates.add(`https://unavatar.io/${clean}.be?fallback=false`);
       candidates.add(`https://unavatar.io/${clean}.com?fallback=false`);
-      candidates.add(`https://icons.duckduckgo.com/ip3/${clean}.be.ico`);
-      candidates.add(`https://icons.duckduckgo.com/ip3/${clean}.com.ico`);
+      candidates.add(`https://api.brandfetch.io/v2/brands/${clean}.be/icon`);
+      candidates.add(`https://api.brandfetch.io/v2/brands/${clean}.com/icon`);
 
-      // 2. Google Direct Image Search API (Vindt ook lokale handelszaken, apotheken, chocolatiers)
+      // 2. Directe DuckDuckGo HD Resolver
       try {
-        const gRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query + ' logo belgie')}`)}`);
+        const ddgRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://duckduckgo.com/i.js?q=${encodeURIComponent(query + ' logo png transparent')}&o=json`)}`);
+        const ddgData = await ddgRes.json();
+        if (ddgData && ddgData.results) {
+          ddgData.results.slice(0, 10).forEach(item => {
+            if (item.image && (item.image.endsWith('.png') || item.image.endsWith('.svg') || item.image.includes('logo') || item.image.endsWith('.jpg'))) {
+              candidates.add(item.image);
+            }
+          });
+        }
+      } catch (e) {}
+
+      // 3. Google HD Vector Scraping (Hoge resolutie bronnen)
+      try {
+        const gRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query + ' logo transparent vector')}`)}`);
         const html = await gRes.text();
         const imgRegex = /src="(https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=[^"]+)"/g;
         let match;
         let count = 0;
-        while ((match = imgRegex.exec(html)) !== null && count < 8) {
+        while ((match = imgRegex.exec(html)) !== null && count < 6) {
           candidates.add(match[1]);
           count++;
         }
@@ -786,32 +795,64 @@
 
       resultsContainer.innerHTML = '';
       if (candidates.size === 0) {
-        resultsContainer.innerHTML = '<span class="text-xs text-slate-400">Geen logo\'s gevonden. Neem een foto of kies categorie.</span>';
+        resultsContainer.innerHTML = '<span class="text-xs text-slate-400">Geen logo gevonden. Neem een foto of kies categorie.</span>';
         return;
       }
 
       candidates.forEach((url) => {
         const imgBtn = document.createElement('button');
         imgBtn.type = 'button';
-        imgBtn.className = 'w-12 h-12 bg-white rounded-2xl p-1 border-2 border-slate-200 flex-shrink-0 flex items-center justify-center hover:border-blue-700 transition overflow-hidden shadow-sm aspect-square';
+        imgBtn.className = 'w-12 h-12 bg-white rounded-2xl p-1.5 border-2 border-slate-200 flex-shrink-0 flex items-center justify-center hover:border-blue-700 transition overflow-hidden shadow-sm aspect-square';
         
         const testImg = document.createElement('img');
         testImg.src = url;
-        testImg.className = 'w-full h-full object-contain';
+        testImg.className = 'w-full h-full object-contain crisp-logo';
         testImg.onerror = () => imgBtn.remove();
         
         imgBtn.appendChild(testImg);
         imgBtn.onclick = () => {
-          tempCardData.iconType = 'IMAGE';
-          tempCardData.iconData = url;
-          tempCardData.iconSymbol = '';
-          updateTilePreview();
+          // Converteer geselecteerd logo meteen naar HD Canvas DataURL om CORS-verval en blur te voorkomen
+          cacheHdLogo(url);
         };
         resultsContainer.appendChild(imgBtn);
       });
     }
 
-    // --- Foto met Automatische 1:1 Center-Square Crop ---
+    function cacheHdLogo(url) {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const size = 512;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, size, size);
+
+        const minDim = Math.min(img.width, img.height);
+        const ratio = Math.min((size - 40) / img.width, (size - 40) / img.height);
+        const w = img.width * ratio;
+        const h = img.height * ratio;
+        const x = (size - w) / 2;
+        const y = (size - h) / 2;
+
+        ctx.drawImage(img, x, y, w, h);
+        tempCardData.iconType = 'IMAGE';
+        tempCardData.iconData = canvas.toDataURL('image/png');
+        tempCardData.iconSymbol = '';
+        updateTilePreview();
+      };
+      img.onerror = function() {
+        tempCardData.iconType = 'IMAGE';
+        tempCardData.iconData = url;
+        tempCardData.iconSymbol = '';
+        updateTilePreview();
+      };
+      img.src = url;
+    }
+
+    // --- Foto met Automatische 1:1 Center-Square Crop (512x512 HD) ---
     function handleCardPhotoUpload(input) {
       if (!input.files || input.files.length === 0) return;
       const file = input.files[0];
@@ -821,12 +862,11 @@
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
-          const cropSize = 350; // Scherpe vierkante resolutie
+          const cropSize = 512; // 512px High Definition
           canvas.width = cropSize;
           canvas.height = cropSize;
           const ctx = canvas.getContext('2d');
 
-          // Bereken center-square crop
           const minDim = Math.min(img.width, img.height);
           const startX = (img.width - minDim) / 2;
           const startY = (img.height - minDim) / 2;
@@ -834,7 +874,7 @@
           ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, cropSize, cropSize);
           
           tempCardData.iconType = 'IMAGE';
-          tempCardData.iconData = canvas.toDataURL('image/jpeg', 0.88);
+          tempCardData.iconData = canvas.toDataURL('image/jpeg', 0.95);
           tempCardData.iconSymbol = '';
           updateTilePreview();
         };
@@ -939,7 +979,6 @@
       reader.readAsText(file);
     }
 
-    // --- Update Checker ---
     async function checkForAppUpdate() {
       const icon = document.getElementById('updateIcon');
       icon.classList.add('animate-spin');
@@ -965,7 +1004,6 @@
       }
     }
 
-    // --- Helper Functions ---
     function setType(type) {
       currentSelectedType = type;
       const bBtn = document.getElementById('typeBarcodeBtn');
@@ -991,7 +1029,6 @@
       return 'BARCODE';
     }
 
-    // --- Scanner Logic ---
     async function toggleScanner() {
       if (isCameraBusy) return;
       const container = document.getElementById('scanner-container');
