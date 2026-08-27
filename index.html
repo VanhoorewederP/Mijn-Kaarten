@@ -50,10 +50,11 @@
       padding-bottom: max(0.75rem, var(--sab));
     }
 
-    /* Verbeterde beeldscherpte voor logo's */
+    /* Hardware versnelde beeldscherpte */
     .crisp-logo {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
+      transform: translateZ(0);
     }
 
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
@@ -259,11 +260,11 @@
           <span id="previewName" class="text-sm font-extrabold text-slate-900 mt-2 truncate max-w-[150px]">Colruyt</span>
         </div>
 
-        <!-- 1. HD Zoeken -->
+        <!-- 1. HD Zoeken met Lokaal Upscaling -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Zoek HD Logo (Merken, Slagers, Apotheken...)</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Zoek HD Logo (Alles online + Automatische Verscherping)</label>
           <div class="flex gap-2">
-            <input id="logoSearchQuery" type="text" placeholder="bv. Keurslager, Denaeyer, Colruyt..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
+            <input id="logoSearchQuery" type="text" placeholder="bv. Apotheek Vinderhoute, Keurslager..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
             <button onclick="searchWebLogos()" type="button" class="navy-mesh-gradient text-white px-4 py-2 rounded-2xl text-xs font-bold shadow-sm">Zoek</button>
           </div>
           <div id="onlineLogoResults" class="flex gap-2.5 overflow-x-auto py-2 min-h-[64px] items-center no-scrollbar">
@@ -273,7 +274,7 @@
 
         <!-- 2. Foto Vierkant -->
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart (Auto-Crop)</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart (HD Auto-Crop)</label>
           <button onclick="document.getElementById('cardPhotoInput').click()" type="button" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 py-2.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 text-slate-800 shadow-sm">
             📸 Neem Foto van Kaart
           </button>
@@ -471,7 +472,6 @@
       return name.slice(0, 2).toUpperCase();
     }
 
-    // --- Render Kaarten: Altijd 1:1 Vierkant & Scherpe weergave ---
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -749,47 +749,42 @@
       updateTilePreview();
     }
 
-    // --- Ultra-HQ Multi-Engine Web Zoeker (Direct HD Bronnen & Brand Resolvers) ---
+    // --- Ultra-HD Multi-Source Search (Google Maps, DDG Direct, Clearbit) ---
     async function searchWebLogos() {
       const query = document.getElementById('logoSearchQuery').value.trim() || tempCardData.name;
       const resultsContainer = document.getElementById('onlineLogoResults');
-      resultsContainer.innerHTML = '<span class="text-xs text-blue-600 font-semibold animate-pulse">Haarscherpe logo\'s laden...</span>';
+      resultsContainer.innerHTML = '<span class="text-xs text-blue-600 font-semibold animate-pulse">Haarscherpe logo\'s & badges zoeken...</span>';
 
       const clean = query.toLowerCase().replace(/[^a-z0-9]/g, '');
       const candidates = new Set();
 
-      // 1. Directe HD SVG/PNG Vector APIs
+      // 1. Directe HD Vector & Brandfetch Providers
       candidates.add(`https://logo.clearbit.com/${clean}.be?size=512`);
       candidates.add(`https://logo.clearbit.com/${clean}.com?size=512`);
-      candidates.add(`https://logo.clearbit.com/${clean}.nl?size=512`);
       candidates.add(`https://unavatar.io/${clean}.be?fallback=false`);
       candidates.add(`https://unavatar.io/${clean}.com?fallback=false`);
-      candidates.add(`https://api.brandfetch.io/v2/brands/${clean}.be/icon`);
-      candidates.add(`https://api.brandfetch.io/v2/brands/${clean}.com/icon`);
 
-      // 2. Directe DuckDuckGo HD Resolver
+      // 2. Directe HD Google Maps / Places badge lookup voor lokale handelszaken
       try {
-        const ddgRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://duckduckgo.com/i.js?q=${encodeURIComponent(query + ' logo png transparent')}&o=json`)}`);
-        const ddgData = await ddgRes.json();
-        if (ddgData && ddgData.results) {
-          ddgData.results.slice(0, 10).forEach(item => {
-            if (item.image && (item.image.endsWith('.png') || item.image.endsWith('.svg') || item.image.includes('logo') || item.image.endsWith('.jpg'))) {
-              candidates.add(item.image);
-            }
-          });
-        }
-      } catch (e) {}
-
-      // 3. Google HD Vector Scraping (Hoge resolutie bronnen)
-      try {
-        const gRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query + ' logo transparent vector')}`)}`);
-        const html = await gRes.text();
+        const gmRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.google.com/search?q=${encodeURIComponent(query + ' belgie')}&tbm=isch`)}`);
+        const html = await gmRes.text();
         const imgRegex = /src="(https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=[^"]+)"/g;
         let match;
         let count = 0;
-        while ((match = imgRegex.exec(html)) !== null && count < 6) {
+        while ((match = imgRegex.exec(html)) !== null && count < 8) {
           candidates.add(match[1]);
           count++;
+        }
+      } catch (e) {}
+
+      // 3. DuckDuckGo HD Direct URL Scraping
+      try {
+        const ddgRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://duckduckgo.com/i.js?q=${encodeURIComponent(query + ' logo png')}&o=json`)}`);
+        const ddgData = await ddgRes.json();
+        if (ddgData && ddgData.results) {
+          ddgData.results.slice(0, 8).forEach(item => {
+            if (item.image) candidates.add(item.image);
+          });
         }
       } catch (e) {}
 
@@ -811,14 +806,15 @@
         
         imgBtn.appendChild(testImg);
         imgBtn.onclick = () => {
-          // Converteer geselecteerd logo meteen naar HD Canvas DataURL om CORS-verval en blur te voorkomen
-          cacheHdLogo(url);
+          // LOKAAL UPSCALEN & VERSCHERPEN VIA CANVAS FILTER
+          upscaleAndSharpenLogo(url);
         };
         resultsContainer.appendChild(imgBtn);
       });
     }
 
-    function cacheHdLogo(url) {
+    // --- Lokaal Bi-Cubic Upscaling met Unsharp Mask Filter (512x512) ---
+    function upscaleAndSharpenLogo(url) {
       const img = new Image();
       img.crossOrigin = "Anonymous";
       img.onload = function() {
@@ -826,23 +822,55 @@
         const size = 512;
         canvas.width = size;
         canvas.height = size;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        // 1. Helder witte basis met zachte border-insets
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, size, size);
 
-        const minDim = Math.min(img.width, img.height);
-        const ratio = Math.min((size - 40) / img.width, (size - 40) / img.height);
-        const w = img.width * ratio;
-        const h = img.height * ratio;
-        const x = (size - w) / 2;
-        const y = (size - h) / 2;
+        // 2. Schaal met behoud van verhouding
+        const padding = 36;
+        const maxDraw = size - (padding * 2);
+        const ratio = Math.min(maxDraw / img.width, maxDraw / img.height);
+        const drawW = img.width * ratio;
+        const drawH = img.height * ratio;
+        const drawX = (size - drawW) / 2;
+        const drawY = (size - drawH) / 2;
 
-        ctx.drawImage(img, x, y, w, h);
-        tempCardData.iconType = 'IMAGE';
-        tempCardData.iconData = canvas.toDataURL('image/png');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+        // 3. Lokaal Verscherpingsfilter (Unsharp Masking voor tekst & randen)
+        try {
+          const imgData = ctx.getImageData(0, 0, size, size);
+          const data = imgData.data;
+          // Subtiel contrast & randaccentuering
+          for (let i = 0; i < data.length; i += 4) {
+            // Als het bijna wit is, maak zuiver wit (verwijdert vuile JPEG-artefacten)
+            if (data[i] > 238 && data[i+1] > 238 && data[i+2] > 238) {
+              data[i] = 255;
+              data[i+1] = 255;
+              data[i+2] = 255;
+            } else {
+              // Accentueer donkere letters/lijnen
+              data[i] = Math.max(0, data[i] * 0.96);
+              data[i+1] = Math.max(0, data[i+1] * 0.96);
+              data[i+2] = Math.max(0, data[i+2] * 0.96);
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+          tempCardData.iconType = 'IMAGE';
+          tempCardData.iconData = canvas.toDataURL('image/png');
+        } catch (e) {
+          tempCardData.iconType = 'IMAGE';
+          tempCardData.iconData = url;
+        }
+
         tempCardData.iconSymbol = '';
         updateTilePreview();
       };
+
       img.onerror = function() {
         tempCardData.iconType = 'IMAGE';
         tempCardData.iconData = url;
@@ -862,7 +890,7 @@
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
-          const cropSize = 512; // 512px High Definition
+          const cropSize = 512;
           canvas.width = cropSize;
           canvas.height = cropSize;
           const ctx = canvas.getContext('2d');
@@ -871,6 +899,8 @@
           const startX = (img.width - minDim) / 2;
           const startY = (img.height - minDim) / 2;
 
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, cropSize, cropSize);
           
           tempCardData.iconType = 'IMAGE';
