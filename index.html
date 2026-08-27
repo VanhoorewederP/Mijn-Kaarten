@@ -33,38 +33,48 @@
     }
 
     html {
-      background-color: #08142c; /* Exact dezelfde kleur als de header */
+      background-color: #08142c;
     }
 
     body {
-      padding-top: 0;
-      padding-bottom: 0;
+      margin: 0;
       padding-left: var(--sal);
       padding-right: var(--sar);
-      margin: 0;
       background-color: #ffffff;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: none; /* Schakelt iOS overscroll bounce uit */
+      overscroll-behavior-y: none;
     }
 
-    /* Trekt de header optisch 500px door naar boven, zodat de kinetische overshoot 100% donkerblauw blijft */
-    header::before {
-      content: '';
-      position: absolute;
-      top: -500px;
+    /* Vaste header die nooit mee kan bewegen met momentum */
+    header.fixed-app-header {
+      position: fixed;
+      top: 0;
       left: 0;
       right: 0;
-      height: 500px;
+      z-index: 40;
+    }
+
+    /* Dummy verlenging naar boven voor de statusbalk */
+    .status-bar-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: max(1rem, var(--sat));
       background-color: #08142c;
-      pointer-events: none;
+      z-index: 50;
     }
 
     .header-box {
       padding-top: max(0.9rem, var(--sat));
+      padding-left: max(1rem, var(--sal));
+      padding-right: max(1rem, var(--sar));
     }
 
     .nav-box {
       padding-bottom: max(0.75rem, var(--sab));
+      padding-left: max(1.5rem, var(--sal));
+      padding-right: max(1.5rem, var(--sar));
     }
 
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
@@ -112,7 +122,7 @@
   </header>
 
   <!-- MIDDEN: Zuiver Wit Kaartenoverzicht -->
-  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
+  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white pt-36">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
@@ -1122,4 +1132,28 @@
     renderCards();
   </script>
 </body>
+
+<div class="status-bar-bg"></div>
+
+  <!-- Header is nu fixed -->
+  <header class="fixed-app-header navy-mesh-gradient text-white shadow-lg px-4 pb-4 header-box border-b border-blue-400/20">
+    <div class="flex justify-between items-center mb-3">
+      <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
+        <span>💳</span> Mijn Kaarten
+      </h1>
+      <button onclick="openAddModal()" class="bg-white/15 hover:bg-white/25 active:scale-95 text-white px-4 py-2 rounded-2xl text-xs font-extrabold transition shadow-md border border-white/25 backdrop-blur-sm">
+        + Nieuw
+      </button>
+    </div>
+
+    <div class="flex gap-2">
+      <div class="relative flex-1">
+        <span class="absolute inset-y-0 left-3 flex items-center text-blue-200 pointer-events-none text-sm">🔍</span>
+        <input id="searchInput" oninput="renderCards()" type="text" placeholder="Zoek kaart..." class="w-full bg-black/25 backdrop-blur-md border border-white/20 rounded-2xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-white focus:ring-2 focus:ring-white/30 text-white placeholder-blue-100/60 transition shadow-inner">
+      </div>
+      <button onclick="toggleSort()" id="sortBtn" class="bg-black/25 backdrop-blur-md border border-white/20 px-3.5 py-2 rounded-2xl text-xs font-bold text-white hover:bg-white/10 transition flex items-center gap-1.5 shadow-inner">
+        <span>🔤</span> <span id="sortLabel">A-Z</span>
+      </button>
+    </div>
+  </header>
 </html>
