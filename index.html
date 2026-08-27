@@ -28,6 +28,14 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
+    /* Blokkeer de iOS pull-down rubber-band bounce */
+    html {
+      background-color: #0e2254; /* Matcht met de bovenste header gradient */
+      overscroll-behavior-y: none;
+      -webkit-overflow-scrolling: touch;
+      height: 100%;
+    }
+
     *, *::before, *::after {
       -webkit-touch-callout: none !important;
       -webkit-user-select: none !important;
@@ -45,6 +53,8 @@
       padding-right: var(--sar);
       margin: 0;
       background-color: #ffffff;
+      overscroll-behavior-y: none;
+      min-height: 100%;
     }
 
     /* Levendige Navy & Indigo Gradient */
