@@ -27,7 +27,6 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
-    /* Blokkeer alle contextmenu's, selecties en callouts (oplossing Android long-press bug) */
     *, *::before, *::after {
       -webkit-touch-callout: none !important;
       -webkit-user-select: none !important;
@@ -35,7 +34,7 @@
     }
 
     img {
-      pointer-events: none; /* Voorkomt chrome image drag / context menu */
+      pointer-events: none;
     }
 
     body {
@@ -63,7 +62,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased pb-28" oncontextmenu="return false;">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased pb-24" oncontextmenu="return false;">
 
   <!-- Header -->
   <header class="px-4 pb-3 bg-slate-900/90 backdrop-blur shadow-md sticky top-0 z-20 border-b border-slate-800 flex flex-col gap-3">
@@ -88,56 +87,58 @@
     </div>
   </header>
 
-  <!-- Hoofdweergave Kaarten: 2 kolommen naast elkaar -->
+  <!-- Hoofdweergave Kaarten -->
   <main class="p-3 max-w-lg w-full mx-auto flex-1">
     <div id="cardList" class="grid grid-cols-2 gap-3"></div>
   </main>
 
-  <!-- Bottom Navigation Bar met 3 Tabbladen -->
-  <nav class="fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 z-30 px-6 py-2 flex justify-around items-center">
-    <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center gap-1 text-blue-500 py-1 transition">
-      <span class="text-xl">⭐</span>
-      <span class="text-xs font-semibold">Vaakst Gebruikt</span>
+  <!-- Bottom Navigation Bar: Strakke 3-koloms grid met Vaakst Gebruikt in het midden -->
+  <nav class="fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 z-30 px-4 py-1.5 grid grid-cols-3 items-center text-center">
+    
+    <!-- Links: Alle Kaarten -->
+    <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-slate-400 py-1 transition active:scale-95">
+      <span class="text-xl leading-none">🗂️</span>
+      <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
-    <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center gap-1 text-slate-400 py-1 transition">
-      <span class="text-xl">🗂️</span>
-      <span class="text-xs font-semibold">Alle Kaarten</span>
+
+    <!-- Midden: Vaakst Gebruikt (Standaard Actief) -->
+    <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center justify-center gap-1 text-blue-500 py-1 transition active:scale-95">
+      <span class="text-xl leading-none">⭐</span>
+      <span class="text-[11px] font-semibold tracking-tight">Vaakst Gebruikt</span>
     </button>
-    <button onclick="openManageModal()" id="tabManageBtn" class="flex flex-col items-center gap-1 text-slate-400 py-1 transition">
-      <span class="text-xl">⚙️</span>
-      <span class="text-xs font-semibold">Beheer</span>
+
+    <!-- Rechts: Beheer -->
+    <button onclick="openManageModal()" id="tabManageBtn" class="flex flex-col items-center justify-center gap-1 text-slate-400 py-1 transition active:scale-95">
+      <span class="text-xl leading-none">⚙️</span>
+      <span class="text-[11px] font-semibold tracking-tight">Beheer</span>
     </button>
   </nav>
 
-  <!-- Modal: Beheer / Backup & Update Menu -->
+  <!-- Modal: Beheer (Zonder overbodige sluitknop onderaan) -->
   <div id="manageModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50" onclick="closeModalOnBgClick(event)">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-xs rounded-3xl p-6 flex flex-col gap-4 text-white shadow-2xl my-auto">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="text-base font-bold flex items-center gap-2"><span>⚙️</span> Beheer & Backup</h3>
-        <button onclick="closeModal('manageModal')" class="text-slate-400 hover:text-white font-bold p-1">✕</button>
+        <button onclick="closeModal('manageModal')" class="text-slate-400 hover:text-white font-bold p-1 text-lg">✕</button>
       </div>
 
       <div class="flex flex-col gap-2.5">
         <button onclick="exportBackup()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 py-3 px-4 rounded-2xl text-xs font-semibold flex items-center justify-between transition active:scale-95">
-          <span class="flex items-center gap-2.5"><span>💾</span> Backup (Download .json bestand)</span>
-          <span>→</span>
+          <span class="flex items-center gap-2.5"><span>💾</span> Backup naar Cloud (Drive/iCloud)</span>
+          <span class="text-slate-400">→</span>
         </button>
 
         <button onclick="document.getElementById('importFileInput').click()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 py-3 px-4 rounded-2xl text-xs font-semibold flex items-center justify-between transition active:scale-95">
           <span class="flex items-center gap-2.5"><span>📥</span> Herstel Opgeslagen Backup</span>
-          <span>→</span>
+          <span class="text-slate-400">→</span>
         </button>
         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importBackup(this)">
 
         <button onclick="checkForAppUpdate()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 py-3 px-4 rounded-2xl text-xs font-semibold flex items-center justify-between transition active:scale-95">
           <span class="flex items-center gap-2.5"><span id="updateIcon">🔄</span> Zoek naar Updates</span>
-          <span>→</span>
+          <span class="text-slate-400">→</span>
         </button>
       </div>
-
-      <button onclick="closeModal('manageModal')" class="w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold text-slate-300 transition">
-        Sluiten
-      </button>
     </div>
   </div>
 
@@ -310,7 +311,6 @@
   </div>
 
   <script>
-    // Service worker registratie
     let swRegistration = null;
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').then((reg) => {
@@ -392,11 +392,11 @@
       const favBtn = document.getElementById('tabFavBtn');
 
       if (tab === 'favorites') {
-        favBtn.className = 'flex flex-col items-center gap-1 text-blue-500 py-1 transition';
-        allBtn.className = 'flex flex-col items-center gap-1 text-slate-400 py-1 transition';
+        favBtn.className = 'flex flex-col items-center justify-center gap-1 text-blue-500 py-1 transition active:scale-95';
+        allBtn.className = 'flex flex-col items-center justify-center gap-1 text-slate-400 py-1 transition active:scale-95';
       } else {
-        allBtn.className = 'flex flex-col items-center gap-1 text-blue-500 py-1 transition';
-        favBtn.className = 'flex flex-col items-center gap-1 text-slate-400 py-1 transition';
+        allBtn.className = 'flex flex-col items-center justify-center gap-1 text-blue-500 py-1 transition active:scale-95';
+        favBtn.className = 'flex flex-col items-center justify-center gap-1 text-slate-400 py-1 transition active:scale-95';
       }
       renderCards();
     }
