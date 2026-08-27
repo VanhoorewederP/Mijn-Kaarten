@@ -28,13 +28,30 @@
       --sar: env(safe-area-inset-right, 0px);
     }
 
-    body {
-      padding-top: var(--sat);
-      padding-left: var(--sal);
-      padding-right: var(--sar);
+    /* 1. Zet het hele viewport-venster muurvast */
+    html, body {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       margin: 0;
-      background-color: #ffffff;
-      -webkit-overflow-scrolling: touch;
+      padding: 0;
+      background-color: #0e2254;
+      touch-action: none; /* Blokkeert browser-level slepen */
+    }
+
+    *, *::before, *::after {
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+    }
+
+    img {
+      pointer-events: none;
     }
 
     .navy-mesh-gradient {
@@ -42,15 +59,59 @@
     }
 
     .header-box {
-      padding-top: max(0.5rem, var(--sat));
+      padding-top: max(0.9rem, var(--sat));
     }
 
     .nav-box {
-      padding-bottom: max(0.6rem, var(--sab));
+      padding-bottom: max(0.75rem, var(--sab));
+    }
+
+    /* 2. Maak enkel het kaarten-middengebied scrollbaar */
+    main.card-scroll-area {
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      touch-action: pan-y; /* Laat verticaal scrollen in de lijst wel toe */
     }
 
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
-    input[type="text"] { font-size: 16px; }
+    input[type="text"] { 
+      font-size: 16px; 
+      -webkit-user-select: auto !important; 
+      user-select: auto !important; 
+    }
+
+    #barcodeCanvas {
+      width: 100% !important;
+      height: 120px !important;
+      max-height: 140px;
+    }
+
+    #qrcodeCanvas img, #qrcodeCanvas canvas {
+      margin: 0 auto;
+      width: 240px !important;
+      height: 240px !important;
+    }
+
+    /* Levendige Navy & Indigo Gradient */
+    .navy-mesh-gradient {
+      background: linear-gradient(135deg, #0e2254 0%, #1d4ed8 45%, #4338ca 80%, #6366f1 100%);
+    }
+
+    .header-box {
+      padding-top: max(0.9rem, var(--sat));
+    }
+
+    .nav-box {
+      padding-bottom: max(0.75rem, var(--sab));
+    }
+
+    #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
+    input[type="text"] { 
+      font-size: 16px; 
+      -webkit-user-select: auto !important; 
+      user-select: auto !important; 
+    }
 
     #barcodeCanvas {
       width: 100% !important;
@@ -65,9 +126,9 @@
     }
   </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased pb-28">
+<body class="text-slate-800 min-h-screen flex flex-col font-sans antialiased bg-white" oncontextmenu="return false;">
 
-  <!-- BOVENSTE VAK: Vaste Sticky Header -->
+  <!-- BOVENSTE VAK: Vlakke rechthoekige header met Navy Gradient -->
   <header class="navy-mesh-gradient text-white shadow-lg sticky top-0 z-20 px-4 pb-4 header-box border-b border-indigo-300/30">
     <div class="flex justify-between items-center mb-3">
       <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 drop-shadow-sm">
@@ -90,12 +151,12 @@
     </div>
   </header>
 
-  <!-- MIDDEN: Zuiver Wit Kaartenoverzicht (Scrollt natuurlijk mee) -->
-  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white">
+  <!-- MIDDEN: Wit Kaartenoverzicht -->
+  <main class="p-4 max-w-lg w-full mx-auto flex-1 bg-white pb-32">
     <div id="cardList" class="grid grid-cols-2 gap-3.5"></div>
   </main>
 
-  <!-- ONDERSTE VAK: Vaste Dock Navigatie -->
+  <!-- ONDERSTE VAK: Vloeiende Dock met afgeronde top -->
   <nav class="fixed bottom-0 inset-x-0 navy-mesh-gradient border-t border-indigo-300/30 z-30 px-6 pt-3 nav-box grid grid-cols-3 items-center text-center rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(29,78,216,0.25)]">
     <!-- Links: Alle Kaarten -->
     <button onclick="switchTab('all')" id="tabAllBtn" class="flex flex-col items-center justify-center gap-1 text-indigo-100/70 hover:text-white py-1 transition active:scale-95">
@@ -103,7 +164,7 @@
       <span class="text-[11px] font-semibold tracking-tight">Alle Kaarten</span>
     </button>
 
-    <!-- Midden: Vaakst Gebruikt -->
+    <!-- Midden: Vaakst Gebruikt (Standaard Actief) -->
     <button onclick="switchTab('favorites')" id="tabFavBtn" class="flex flex-col items-center justify-center gap-1 text-white py-1 transition active:scale-95 drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]">
       <span class="text-xl leading-none">⭐</span>
       <span class="text-[11px] font-extrabold tracking-tight">Vaakst Gebruikt</span>
@@ -144,7 +205,7 @@
     </div>
   </div>
 
-  <!-- Modal: Toon Code (Groot formaat & WakeLock) -->
+  <!-- Modal: Toon Code (Groot formaat & Helderheid) -->
   <div id="viewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden z-50 overflow-y-auto" onclick="closeModalOnBgClick(event)">
     <div id="viewModalContent" class="bg-white text-slate-900 w-full max-w-md rounded-[2.5rem] p-6 sm:p-8 flex flex-col items-center gap-4 text-center shadow-2xl my-auto border border-slate-100">
       
@@ -314,6 +375,7 @@
   </div>
 
   <script>
+    // 1. Service Worker registratie met expliciete bypass van de HTTP-cache
     let swRegistration = null;
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then((reg) => {
@@ -332,6 +394,7 @@
       });
     }
 
+    // 2. Globale variabelen
     let cards = JSON.parse(localStorage.getItem('cards') || '[]');
     let html5QrCode = null;
     let currentSelectedType = 'BARCODE';
@@ -352,6 +415,7 @@
       iconData: '#1d4ed8'
     };
 
+    // 3. Screen Wake Lock
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -367,6 +431,7 @@
       }
     }
 
+    // 4. Universele Custom Popups
     function showAppDialog({ title = 'Melding', message = '', icon = 'ℹ️', confirmText = 'Begrepen', confirmColor = 'navy-mesh-gradient', showCancel = false, cancelText = 'Annuleren' }) {
       return new Promise((resolve) => {
         const modal = document.getElementById('dialogModal');
@@ -403,6 +468,7 @@
 
     window.alert = function(msg) { showAppAlert(msg); };
 
+    // 5. Tabblad Management
     function switchTab(tab) {
       currentTab = tab;
       const allBtn = document.getElementById('tabAllBtn');
@@ -439,6 +505,7 @@
       return name.slice(0, 2).toUpperCase();
     }
 
+    // 6. Render Kaarten
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -490,6 +557,7 @@
       });
     }
 
+    // 7. Kaart Weergeven
     function showCard(index) {
       activeViewingIndex = index;
       const card = cards[index];
@@ -603,6 +671,7 @@
       document.getElementById('addModal').classList.remove('hidden');
     }
 
+    // 8. Wizard Stappen
     function openAddModal() {
       editingIndex = null;
       document.getElementById('cardName').value = '';
@@ -771,6 +840,7 @@
       closeModal('addModal');
     }
 
+    // 9. Backup & Restore
     async function exportBackup() {
       if (cards.length === 0) {
         showAppAlert("Er zijn nog geen kaarten om een backup van te maken.", "Geen Kaarten", "ℹ️");
@@ -844,6 +914,7 @@
       reader.readAsText(file);
     }
 
+    // 10. Forceren van Update
     async function checkForAppUpdate() {
       const icon = document.getElementById('updateIcon');
       icon.classList.add('animate-spin');
@@ -869,6 +940,7 @@
       }
     }
 
+    // 11. Helper Functies
     function setType(type) {
       currentSelectedType = type;
       const bBtn = document.getElementById('typeBarcodeBtn');
@@ -894,6 +966,7 @@
       return 'BARCODE';
     }
 
+    // 12. Scanner Logica
     async function toggleScanner() {
       if (isCameraBusy) return;
       const container = document.getElementById('scanner-container');
@@ -997,6 +1070,7 @@
       if (e.target === e.currentTarget) closeModal(e.currentTarget.id);
     }
 
+    // Start direct
     renderCards();
   </script>
 </body>
