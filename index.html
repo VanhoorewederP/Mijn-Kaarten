@@ -50,13 +50,6 @@
       padding-bottom: max(0.75rem, var(--sab));
     }
 
-    /* Hardware versnelde beeldscherpte */
-    .crisp-logo {
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
-      transform: translateZ(0);
-    }
-
     #reader video { object-fit: cover; border-radius: 1rem; width: 100% !important; }
     input[type="text"] { font-size: 16px; }
 
@@ -260,11 +253,11 @@
           <span id="previewName" class="text-sm font-extrabold text-slate-900 mt-2 truncate max-w-[150px]">Colruyt</span>
         </div>
 
-        <!-- 1. HD Zoeken met Lokaal Upscaling -->
+        <!-- 1. HD Zoeken -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Zoek HD Logo (Alles online + Automatische Verscherping)</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Zoek HD Logo (Merken, Slagers, Apotheken...)</label>
           <div class="flex gap-2">
-            <input id="logoSearchQuery" type="text" placeholder="bv. Apotheek Vinderhoute, Keurslager..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
+            <input id="logoSearchQuery" type="text" placeholder="bv. Keurslager, Denaeyer, Colruyt..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-700 focus:bg-white text-slate-900">
             <button onclick="searchWebLogos()" type="button" class="navy-mesh-gradient text-white px-4 py-2 rounded-2xl text-xs font-bold shadow-sm">Zoek</button>
           </div>
           <div id="onlineLogoResults" class="flex gap-2.5 overflow-x-auto py-2 min-h-[64px] items-center no-scrollbar">
@@ -274,7 +267,7 @@
 
         <!-- 2. Foto Vierkant -->
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-3">
-          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart (HD Auto-Crop)</label>
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Foto van Fysieke Kaart (Auto-Crop)</label>
           <button onclick="document.getElementById('cardPhotoInput').click()" type="button" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 py-2.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 text-slate-800 shadow-sm">
             📸 Neem Foto van Kaart
           </button>
@@ -472,6 +465,7 @@
       return name.slice(0, 2).toUpperCase();
     }
 
+    // --- Render Kaarten: Altijd 1:1 Vierkant & Originele Beeldkwaliteit ---
     function renderCards() {
       const container = document.getElementById('cardList');
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -509,7 +503,7 @@
 
         if (card.iconType === 'IMAGE' && card.iconData) {
           bgStyle = 'background-color: #ffffff;';
-          tileInner = `<img src="${card.iconData}" class="w-full h-full object-contain p-2 crisp-logo" onerror="this.parentElement.style.backgroundColor='#1e3a8a'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
+          tileInner = `<img src="${card.iconData}" class="w-full h-full object-contain p-2" onerror="this.parentElement.style.backgroundColor='#1e3a8a'; this.parentElement.innerHTML='<span class=\'font-bold text-2xl text-white\'>${getInitials(card.name)}</span>'">`;
         } else if (card.iconType === 'ICON' && card.iconSymbol) {
           bgStyle = `background-color: ${card.iconData || '#1e3a8a'};`;
           tileInner = `<span class="text-4xl drop-shadow">${card.iconSymbol}</span>`;
@@ -543,7 +537,7 @@
       const logoWrapper = document.getElementById('viewLogoWrapper');
       if (card.iconType === 'IMAGE' && card.iconData) {
         logoWrapper.style.backgroundColor = '#ffffff';
-        logoWrapper.innerHTML = `<img src="${card.iconData}" class="w-full h-full object-contain p-1 crisp-logo">`;
+        logoWrapper.innerHTML = `<img src="${card.iconData}" class="w-full h-full object-contain p-1">`;
       } else if (card.iconType === 'ICON' && card.iconSymbol) {
         logoWrapper.style.backgroundColor = card.iconData || '#1e3a8a';
         logoWrapper.innerHTML = `<span class="text-lg">${card.iconSymbol}</span>`;
@@ -715,7 +709,7 @@
       const preview = document.getElementById('previewTile');
       if (tempCardData.iconType === 'IMAGE' && tempCardData.iconData) {
         preview.style.backgroundColor = '#ffffff';
-        preview.innerHTML = `<img src="${tempCardData.iconData}" class="w-full h-full object-contain p-1.5 crisp-logo">`;
+        preview.innerHTML = `<img src="${tempCardData.iconData}" class="w-full h-full object-contain p-1.5">`;
       } else if (tempCardData.iconType === 'ICON' && tempCardData.iconSymbol) {
         preview.style.backgroundColor = tempCardData.iconData || '#1e3a8a';
         preview.innerHTML = `<span class="text-4xl drop-shadow">${tempCardData.iconSymbol}</span>`;
@@ -749,40 +743,34 @@
       updateTilePreview();
     }
 
-    // --- Ultra-HD Multi-Source Search (Google Maps, DDG Direct, Clearbit) ---
+    // --- Zuivere HD Logo Zoeker (Google HD Favicons + Vector Resolvers) ---
     async function searchWebLogos() {
       const query = document.getElementById('logoSearchQuery').value.trim() || tempCardData.name;
       const resultsContainer = document.getElementById('onlineLogoResults');
-      resultsContainer.innerHTML = '<span class="text-xs text-blue-600 font-semibold animate-pulse">Haarscherpe logo\'s & badges zoeken...</span>';
+      resultsContainer.innerHTML = '<span class="text-xs text-blue-600 font-semibold animate-pulse">HD logo\'s ophalen...</span>';
 
       const clean = query.toLowerCase().replace(/[^a-z0-9]/g, '');
       const candidates = new Set();
 
-      // 1. Directe HD Vector & Brandfetch Providers
-      candidates.add(`https://logo.clearbit.com/${clean}.be?size=512`);
-      candidates.add(`https://logo.clearbit.com/${clean}.com?size=512`);
-      candidates.add(`https://unavatar.io/${clean}.be?fallback=false`);
-      candidates.add(`https://unavatar.io/${clean}.com?fallback=false`);
+      // 1. Google 128px HD Favicons (Geen kwaliteitsverlies)
+      candidates.add(`https://www.google.com/s2/favicons?domain=${clean}.be&sz=128`);
+      candidates.add(`https://www.google.com/s2/favicons?domain=${clean}.com&sz=128`);
+      candidates.add(`https://www.google.com/s2/favicons?domain=${clean}.nl&sz=128`);
+      candidates.add(`https://www.google.com/s2/favicons?domain=keurslager.be&sz=128`);
+      candidates.add(`https://www.google.com/s2/favicons?domain=keurslager.nl&sz=128`);
 
-      // 2. Directe HD Google Maps / Places badge lookup voor lokale handelszaken
-      try {
-        const gmRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.google.com/search?q=${encodeURIComponent(query + ' belgie')}&tbm=isch`)}`);
-        const html = await gmRes.text();
-        const imgRegex = /src="(https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=[^"]+)"/g;
-        let match;
-        let count = 0;
-        while ((match = imgRegex.exec(html)) !== null && count < 8) {
-          candidates.add(match[1]);
-          count++;
-        }
-      } catch (e) {}
+      // 2. Clearbit & Unavatar HD
+      candidates.add(`https://logo.clearbit.com/${clean}.be?size=256`);
+      candidates.add(`https://logo.clearbit.com/${clean}.com?size=256`);
+      candidates.add(`https://unavatar.io/${clean}.be`);
+      candidates.add(`https://unavatar.io/${clean}.com`);
 
-      // 3. DuckDuckGo HD Direct URL Scraping
+      // 3. DuckDuckGo directe afbeeldingsbronnen
       try {
-        const ddgRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://duckduckgo.com/i.js?q=${encodeURIComponent(query + ' logo png')}&o=json`)}`);
+        const ddgRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://duckduckgo.com/i.js?q=${encodeURIComponent(query + ' logo')}&o=json`)}`);
         const ddgData = await ddgRes.json();
         if (ddgData && ddgData.results) {
-          ddgData.results.slice(0, 8).forEach(item => {
+          ddgData.results.slice(0, 10).forEach(item => {
             if (item.image) candidates.add(item.image);
           });
         }
@@ -801,86 +789,22 @@
         
         const testImg = document.createElement('img');
         testImg.src = url;
-        testImg.className = 'w-full h-full object-contain crisp-logo';
+        testImg.className = 'w-full h-full object-contain';
         testImg.onerror = () => imgBtn.remove();
         
         imgBtn.appendChild(testImg);
         imgBtn.onclick = () => {
-          // LOKAAL UPSCALEN & VERSCHERPEN VIA CANVAS FILTER
-          upscaleAndSharpenLogo(url);
+          // Direct de originele, onvervormde URL toekennen
+          tempCardData.iconType = 'IMAGE';
+          tempCardData.iconData = url;
+          tempCardData.iconSymbol = '';
+          updateTilePreview();
         };
         resultsContainer.appendChild(imgBtn);
       });
     }
 
-    // --- Lokaal Bi-Cubic Upscaling met Unsharp Mask Filter (512x512) ---
-    function upscaleAndSharpenLogo(url) {
-      const img = new Image();
-      img.crossOrigin = "Anonymous";
-      img.onload = function() {
-        const canvas = document.createElement('canvas');
-        const size = 512;
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-        // 1. Helder witte basis met zachte border-insets
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, size, size);
-
-        // 2. Schaal met behoud van verhouding
-        const padding = 36;
-        const maxDraw = size - (padding * 2);
-        const ratio = Math.min(maxDraw / img.width, maxDraw / img.height);
-        const drawW = img.width * ratio;
-        const drawH = img.height * ratio;
-        const drawX = (size - drawW) / 2;
-        const drawY = (size - drawH) / 2;
-
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-        // 3. Lokaal Verscherpingsfilter (Unsharp Masking voor tekst & randen)
-        try {
-          const imgData = ctx.getImageData(0, 0, size, size);
-          const data = imgData.data;
-          // Subtiel contrast & randaccentuering
-          for (let i = 0; i < data.length; i += 4) {
-            // Als het bijna wit is, maak zuiver wit (verwijdert vuile JPEG-artefacten)
-            if (data[i] > 238 && data[i+1] > 238 && data[i+2] > 238) {
-              data[i] = 255;
-              data[i+1] = 255;
-              data[i+2] = 255;
-            } else {
-              // Accentueer donkere letters/lijnen
-              data[i] = Math.max(0, data[i] * 0.96);
-              data[i+1] = Math.max(0, data[i+1] * 0.96);
-              data[i+2] = Math.max(0, data[i+2] * 0.96);
-            }
-          }
-          ctx.putImageData(imgData, 0, 0);
-          tempCardData.iconType = 'IMAGE';
-          tempCardData.iconData = canvas.toDataURL('image/png');
-        } catch (e) {
-          tempCardData.iconType = 'IMAGE';
-          tempCardData.iconData = url;
-        }
-
-        tempCardData.iconSymbol = '';
-        updateTilePreview();
-      };
-
-      img.onerror = function() {
-        tempCardData.iconType = 'IMAGE';
-        tempCardData.iconData = url;
-        tempCardData.iconSymbol = '';
-        updateTilePreview();
-      };
-      img.src = url;
-    }
-
-    // --- Foto met Automatische 1:1 Center-Square Crop (512x512 HD) ---
+    // --- Foto met Automatische 1:1 Center-Square Crop ---
     function handleCardPhotoUpload(input) {
       if (!input.files || input.files.length === 0) return;
       const file = input.files[0];
