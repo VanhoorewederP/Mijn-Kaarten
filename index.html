@@ -1086,6 +1086,22 @@
       if (e.target === e.currentTarget) closeModal(e.currentTarget.id);
     }
 
+
+    // Voorkom enkel het naar beneden trekken aan de top op iOS (geen rubber-banding)
+    let touchStartY = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      const touchY = e.touches[0].clientY;
+      const isPullingDown = touchY > touchStartY;
+      // Als de pagina al helemaal bovenaan staat en je trekt omlaag -> blokkeer
+      if (window.scrollY === 0 && isPullingDown) {
+        if (e.cancelable) e.preventDefault();
+      }
+    }, { passive: false });
+
     renderCards();
   </script>
 </body>
